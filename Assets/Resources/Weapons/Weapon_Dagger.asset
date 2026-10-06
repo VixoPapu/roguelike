@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_Dagger
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Dagger
+  description: "Arma f\xEDsica com\xFAn; no consume energ\xEDa."
+  icon: {fileID: 5538748104734393709, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: 5538748104734393709, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 4
+  rarity: 0
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 12
+  spriteRow: 0
+  damage: 7
+  attackSpeed: 7.1
+  range: 1.1
+  knockback: 1
+  criticalChance: 0.32
+  criticalMultiplier: 2
+  energyCost: 0
+  recovery: 0.14
+  comboAttacks: 3
+  attackDuration: 0.1
+  hitbox: {x: 1, y: 0.65}
+  projectile: 0
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 0
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 0
+  specialEffect: 
+  specialEffects: 
+  specialEffectChance: 0.25
+  specialEffectPower: 1
+  effectColor: {r: 1, g: 1, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 38

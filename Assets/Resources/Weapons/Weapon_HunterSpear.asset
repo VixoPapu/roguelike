@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_HunterSpear
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Lanza del cazador
+  description: Ataque estrecho, veloz y de gran alcance.
+  icon: {fileID: 5160201626676394264, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: 5160201626676394264, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 3
+  rarity: 1
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 10
+  spriteRow: 1
+  damage: 16
+  attackSpeed: 3.3
+  range: 2.35
+  knockback: 2.8
+  criticalChance: 0.12
+  criticalMultiplier: 2.12
+  energyCost: 0
+  recovery: 0.3030303
+  comboAttacks: 2
+  attackDuration: 0.18787879
+  hitbox: {x: 2.35, y: 0.48}
+  projectile: 0
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 10
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 0
+  specialEffect: Sin poder especial.
+  specialEffects: 
+  specialEffectChance: 0
+  specialEffectPower: 1
+  effectColor: {r: 1, g: 1, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 55

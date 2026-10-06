@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_FlameStaff
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: "Bast\xF3n de fuego"
+  description: "Quemadura durante 4s garantizado al impactar. Coste: 5 energia por ataque."
+  icon: {fileID: -9867010548473155, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: -9867010548473155, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 7
+  rarity: 2
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 21
+  spriteRow: 3
+  damage: 25
+  attackSpeed: 2
+  range: 7.5
+  knockback: 2
+  criticalChance: 0.14
+  criticalMultiplier: 2.24
+  energyCost: 5
+  recovery: 0.5
+  comboAttacks: 1
+  attackDuration: 0.31
+  hitbox: {x: 7.5, y: 1}
+  projectile: 1
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 10.5
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 1
+  specialEffect: "Quemadura durante 4s garantizado al impactar. Coste: 5 energia por ataque."
+  specialEffects: 02000000
+  specialEffectChance: 0.55
+  specialEffectPower: 1.35
+  effectColor: {r: 1, g: 0.2, b: 0.02, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 82

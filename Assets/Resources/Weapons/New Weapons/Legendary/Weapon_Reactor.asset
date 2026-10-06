@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_Reactor
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Reactor del alba
+  description: 'Doce rayos radiales perforantes con dos rebotes; recuperan energia
+    por impacto. Principal: recupera energia por impacto (100% al impactar). Adicionales
+    (80% cada uno): rayos encadenados, explosion e incendio de vecinos en 2.5m. Coste:
+    10 energia por ataque.'
+  icon: {fileID: -2052472699, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: -2052472699, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 7
+  rarity: 4
+  spriteSheet: {fileID: 0}
+  spriteColumn: 0
+  spriteRow: 0
+  damage: 32
+  attackSpeed: 0.8
+  range: 11
+  knockback: 3.5
+  criticalChance: 0.14
+  criticalMultiplier: 2.4
+  energyCost: 10
+  recovery: 1.25
+  comboAttacks: 1
+  attackDuration: 0.36
+  hitbox: {x: 11, y: 1}
+  projectile: 1
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 15
+  projectileCount: 12
+  bounces: 2
+  piercing: 1
+  elemental: 1
+  specialEffect: 'Principal: recupera energia por impacto (100% al impactar). Adicionales
+    (80% cada uno): rayos encadenados, explosion e incendio de vecinos en 2.5m.'
+  specialEffects: 0f0000000400000013000000
+  specialEffectChance: 0.8
+  specialEffectPower: 2
+  effectColor: {r: 0.1, g: 0.95, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 280
+  attackPattern: 0
+  projectileMotion: 0
+  sweepAngle: 110
+  spreadAngle: 14
+  projectileLifetime: 3

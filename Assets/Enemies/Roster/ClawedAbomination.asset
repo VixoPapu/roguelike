@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: ClawedAbomination
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Clawed Abomination
+  description: Monstruo resistente que encadena tres zarpazos.
+  sprite: {fileID: 560772106992565872, guid: 4d3e5433eb8c2344691756461c413d11, type: 3}
+  animationFrames:
+  - {fileID: 560772106992565872, guid: 4d3e5433eb8c2344691756461c413d11, type: 3}
+  animationFramesPerSecond: 8
+  animations: {fileID: 0}
+  behaviours: 00000000
+  maxHealth: 138
+  damage: 7
+  moveSpeed: 2.55
+  defense: 2
+  resistance: 0.1
+  knockbackResistance: 0.48
+  detectionRange: 9
+  attackRange: 1.25
+  preferredRange: 2.2
+  attackCooldown: 1.35
+  recoveryTime: 0.38
+  attackStyle: 2
+  effectColor: {r: 0.95, g: 0.08, b: 0.2, a: 1}
+  projectileSpeed: 7
+  projectileCount: 1
+  chargeTelegraph: 0.55
+  chargeSpeed: 9
+  chargeDistance: 4
+  teleportCooldown: 4.2
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.48
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 8
+  coinReward: 1
+  minCoins: 2
+  maxCoins: 5
+  minEnergy: 5
+  maxEnergy: 16

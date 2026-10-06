@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: BrawnyOgre
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Brawny Ogre
+  description: "Bruto pesado: telegraf\xEDa y embiste con gran da\xF1o."
+  sprite: {fileID: 2144151034724904710, guid: 76e012cb40e681643bc8ecc3dfc37330, type: 3}
+  animationFrames:
+  - {fileID: 2144151034724904710, guid: 76e012cb40e681643bc8ecc3dfc37330, type: 3}
+  - {fileID: 595555567984841546, guid: 76e012cb40e681643bc8ecc3dfc37330, type: 3}
+  - {fileID: -6267479771419316695, guid: 76e012cb40e681643bc8ecc3dfc37330, type: 3}
+  - {fileID: -860201698049871586, guid: 76e012cb40e681643bc8ecc3dfc37330, type: 3}
+  animationFramesPerSecond: 6
+  animations: {fileID: 0}
+  behaviours: 0000000002000000
+  maxHealth: 190
+  damage: 7
+  moveSpeed: 1.65
+  defense: 4
+  resistance: 0.18
+  knockbackResistance: 0.33333334
+  detectionRange: 8
+  attackRange: 1.3
+  preferredRange: 4
+  attackCooldown: 1.65
+  recoveryTime: 0.22
+  projectileSpeed: 7
+  projectileCount: 1
+  chargeTelegraph: 0.85
+  chargeSpeed: 10.5
+  chargeDistance: 5.8
+  teleportCooldown: 4.4
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.55
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 12
+  coinReward: 5

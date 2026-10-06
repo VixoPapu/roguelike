@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_Rosario
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Rosario orbital
+  description: 'Cinco sellos orbitan y maldicen durante dos segundos. Principal:
+    maldicion (100% al impactar). Adicionales (65% cada uno): recupera energia por
+    impacto. Coste: 8 energia por ataque.'
+  icon: {fileID: -4533979022283651494, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: -4533979022283651494, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 8
+  rarity: 3
+  spriteSheet: {fileID: 0}
+  spriteColumn: 0
+  spriteRow: 0
+  damage: 16
+  attackSpeed: 0.625
+  range: 2.7
+  knockback: 3.5
+  criticalChance: 0.125
+  criticalMultiplier: 2.3
+  energyCost: 8
+  recovery: 1.6
+  comboAttacks: 1
+  attackDuration: 0.36
+  hitbox: {x: 2.7, y: 1}
+  projectile: 1
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 13.5
+  projectileCount: 5
+  bounces: 0
+  piercing: 1
+  elemental: 1
+  specialEffect: 'Principal: maldicion (100% al impactar). Adicionales (65% cada
+    uno): recupera energia por impacto.'
+  specialEffects: 0d0000000f000000
+  specialEffectChance: 0.65
+  specialEffectPower: 1.4
+  effectColor: {r: 0.7, g: 0.2, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 175
+  attackPattern: 0
+  projectileMotion: 0
+  sweepAngle: 110
+  spreadAngle: 14
+  projectileLifetime: 3

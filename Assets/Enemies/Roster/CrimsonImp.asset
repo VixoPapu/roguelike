@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: CrimsonImp
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Crimson Imp
+  description: "Diablillo m\xF3vil que lanza un abanico de fuego."
+  sprite: {fileID: 1273697980441435137, guid: 0d20538f9390dd544982e9978ddfcccc, type: 3}
+  animationFrames:
+  - {fileID: 1273697980441435137, guid: 0d20538f9390dd544982e9978ddfcccc, type: 3}
+  - {fileID: -9059472788029286713, guid: 0d20538f9390dd544982e9978ddfcccc, type: 3}
+  - {fileID: -254153787536238094, guid: 0d20538f9390dd544982e9978ddfcccc, type: 3}
+  - {fileID: -5175328185335339332, guid: 0d20538f9390dd544982e9978ddfcccc, type: 3}
+  animationFramesPerSecond: 8
+  animations: {fileID: 0}
+  behaviours: 0100000007000000
+  maxHealth: 44
+  damage: 3
+  moveSpeed: 3.6
+  defense: 0
+  resistance: 0.02
+  knockbackResistance: 0.04
+  detectionRange: 9
+  attackRange: 0.9
+  preferredRange: 4.2
+  attackCooldown: 1.35
+  recoveryTime: 0.2
+  attackStyle: 4
+  effectColor: {r: 1, g: 0.16, b: 0.025, a: 1}
+  projectileSpeed: 7.8
+  projectileCount: 3
+  chargeTelegraph: 0.55
+  chargeSpeed: 9
+  chargeDistance: 4
+  teleportCooldown: 4.2
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.15
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 2
+  coinReward: 1
+  minCoins: 1
+  maxCoins: 3
+  minEnergy: 5
+  maxEnergy: 12

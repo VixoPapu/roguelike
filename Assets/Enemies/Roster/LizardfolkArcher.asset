@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: LizardfolkArcher
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Lizardfolk Archer
+  description: "Arquero medio: m\xE1s vida y precisi\xF3n que un goblin."
+  sprite: {fileID: -8992151957312955623, guid: 092417da4c1255f46b1ab72f9e5ba0ab, type: 3}
+  animationFrames:
+  - {fileID: -8992151957312955623, guid: 092417da4c1255f46b1ab72f9e5ba0ab, type: 3}
+  - {fileID: -2736645294339136725, guid: 092417da4c1255f46b1ab72f9e5ba0ab, type: 3}
+  - {fileID: 4704687501791866702, guid: 092417da4c1255f46b1ab72f9e5ba0ab, type: 3}
+  - {fileID: -1706051511188085700, guid: 092417da4c1255f46b1ab72f9e5ba0ab, type: 3}
+  animationFramesPerSecond: 8
+  animations: {fileID: 0}
+  behaviours: 0100000007000000
+  maxHealth: 52
+  damage: 4
+  moveSpeed: 2.8
+  defense: 1
+  resistance: 0.07
+  knockbackResistance: 0.083333336
+  detectionRange: 8
+  attackRange: 1
+  preferredRange: 5.2
+  attackCooldown: 1.1
+  recoveryTime: 0.22
+  projectileSpeed: 10
+  projectileCount: 1
+  chargeTelegraph: 0.55
+  chargeSpeed: 9
+  chargeDistance: 5
+  teleportCooldown: 4.4
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.2
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 3
+  coinReward: 1

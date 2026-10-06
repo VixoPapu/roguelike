@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7dd1f5866edf2104d9581987f131aeeb, type: 3}
+  m_Name: ChestVisualCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase9.ChestVisualCatalog
+  commonFrames:
+  - {fileID: -5801566434257123781, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -7113724523317483968, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 1581624475758528257, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 7208404788074594048, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  rareFrames:
+  - {fileID: 9140302504542890053, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -4935171052068035078, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 7519383867358664542, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 4869525550215414854, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  cursedFrames:
+  - {fileID: 4653039762801819830, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -5675582305045212481, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 2577092603945126908, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 6493644906698436018, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  secretFrames:
+  - {fileID: 2935558761603739087, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -8396546049282100015, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 3645096110201999912, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: 7077675042370466893, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  bossFrames:
+  - {fileID: -3115559327079785764, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -802676298296839394, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -857449375307737392, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}
+  - {fileID: -7078414876635794341, guid: d8e9e5141fd8c564dad30605491352e5, type: 3}

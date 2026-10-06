@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0023381a9dd46724696c5163c2314b66, type: 3}
+  m_Name: Room_TrainingCombat
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase5.RoomData
+  displayName: Training Combat Room
+  description: 'Sala de combate normal: desbloquea la puerta y entrega el cofre al
+    limpiar los enemigos.'
+  roomType: 0
+  visualVariant: 0
+  closeDoorsOnCombat: 1
+  enemySpawns: []
+  rewardChance: 1
+  rewardPrefab: {fileID: 0}

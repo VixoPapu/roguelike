@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: OcularWatcher
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Ocular Watcher
+  description: 'Centinela arcano: torreta que se reposiciona por teletransporte.'
+  sprite: {fileID: 905840938178670301, guid: d148d43fabf379a48a19662dc9290f08, type: 3}
+  animationFrames:
+  - {fileID: 905840938178670301, guid: d148d43fabf379a48a19662dc9290f08, type: 3}
+  - {fileID: 736947429455551993, guid: d148d43fabf379a48a19662dc9290f08, type: 3}
+  - {fileID: -8894580217276112166, guid: d148d43fabf379a48a19662dc9290f08, type: 3}
+  - {fileID: -1088395967450916972, guid: d148d43fabf379a48a19662dc9290f08, type: 3}
+  animationFramesPerSecond: 6
+  animations: {fileID: 0}
+  behaviours: 0300000004000000
+  maxHealth: 78
+  damage: 4
+  moveSpeed: 0
+  defense: 2
+  resistance: 0.15
+  knockbackResistance: 0.16666667
+  detectionRange: 8
+  attackRange: 1
+  preferredRange: 6.2
+  attackCooldown: 0.95
+  recoveryTime: 0.22
+  projectileSpeed: 8.5
+  projectileCount: 3
+  chargeTelegraph: 0.55
+  chargeSpeed: 9
+  chargeDistance: 5
+  teleportCooldown: 4.4
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.2
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 5
+  coinReward: 2

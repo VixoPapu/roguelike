@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_StormDaggers
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Dagas de tormenta
+  description: "Rayos encadenados garantizado al impactar. Coste: 1.7 energia por ataque."
+  icon: {fileID: -2513424609313257362, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: -2513424609313257362, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 4
+  rarity: 2
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 12
+  spriteRow: 4
+  damage: 14
+  attackSpeed: 5.8
+  range: 1.1
+  knockback: 1.3
+  criticalChance: 0.28
+  criticalMultiplier: 2.24
+  energyCost: 1.7
+  recovery: 0.17241378
+  comboAttacks: 4
+  attackDuration: 0.10689654
+  hitbox: {x: 1.1, y: 1}
+  projectile: 0
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 10
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 1
+  specialEffect: "Rayos encadenados garantizado al impactar. Coste: 1.7 energia por ataque."
+  specialEffects: 04000000
+  specialEffectChance: 0.55
+  specialEffectPower: 1.2
+  effectColor: {r: 0.25, g: 0.7, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 82

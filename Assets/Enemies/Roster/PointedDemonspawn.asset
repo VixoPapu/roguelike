@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: PointedDemonspawn
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Pointed Demonspawn
+  description: "Demonio que dispara lanzas de energ\xEDa perforante."
+  sprite: {fileID: -6496720751564950627, guid: 949f1c56e7dfe604f96780214562e43c, type: 3}
+  animationFrames:
+  - {fileID: -6496720751564950627, guid: 949f1c56e7dfe604f96780214562e43c, type: 3}
+  - {fileID: 8653334061972897523, guid: 949f1c56e7dfe604f96780214562e43c, type: 3}
+  - {fileID: -7259683952613760221, guid: 949f1c56e7dfe604f96780214562e43c, type: 3}
+  - {fileID: 1046341429388447947, guid: 949f1c56e7dfe604f96780214562e43c, type: 3}
+  animationFramesPerSecond: 8
+  animations: {fileID: 0}
+  behaviours: 01000000
+  maxHealth: 69
+  damage: 5
+  moveSpeed: 3
+  defense: 1
+  resistance: 0.06
+  knockbackResistance: 0.18
+  detectionRange: 9
+  attackRange: 1
+  preferredRange: 5
+  attackCooldown: 1.25
+  recoveryTime: 0.26
+  attackStyle: 7
+  effectColor: {r: 1, g: 0.72, b: 0.2, a: 1}
+  projectileSpeed: 9.2
+  projectileCount: 1
+  chargeTelegraph: 0.5
+  chargeSpeed: 9
+  chargeDistance: 4
+  teleportCooldown: 4.2
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.26
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 4
+  coinReward: 1
+  minCoins: 1
+  maxCoins: 3
+  minEnergy: 5
+  maxEnergy: 12

@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_Luciernaga
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Vara luciernaga
+  description: 'Llama que corrige su trayectoria buscando enemigos. Principal: quemadura
+    (100% al impactar). Coste: 3.2 energia por ataque.'
+  icon: {fileID: 919943512, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: 919943512, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 7
+  rarity: 1
+  spriteSheet: {fileID: 0}
+  spriteColumn: 0
+  spriteRow: 0
+  damage: 15
+  attackSpeed: 1.6667
+  range: 8
+  knockback: 3.5
+  criticalChance: 0.095
+  criticalMultiplier: 2.1
+  energyCost: 3.2
+  recovery: 0.6
+  comboAttacks: 1
+  attackDuration: 0.36
+  hitbox: {x: 8, y: 1}
+  projectile: 1
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 10.5
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 1
+  specialEffect: 'Principal: quemadura (100% al impactar).'
+  specialEffects: 02000000
+  specialEffectChance: 1
+  specialEffectPower: 0.85
+  effectColor: {r: 1, g: 0.3, b: 0.025, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 60
+  attackPattern: 0
+  projectileMotion: 0
+  sweepAngle: 110
+  spreadAngle: 14
+  projectileLifetime: 3

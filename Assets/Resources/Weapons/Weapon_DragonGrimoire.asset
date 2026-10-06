@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_DragonGrimoire
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: "Grimorio del drag\xF3n"
+  description: "Quemadura durante 4s garantizado al impactar; onda de dano en un radio de 2m (80%). Coste: 9.7 energia por ataque."
+  icon: {fileID: -363745843, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: -363745843, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 10
+  rarity: 4
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 25
+  spriteRow: 7
+  damage: 46
+  attackSpeed: 1.45
+  range: 9
+  knockback: 3
+  criticalChance: 0.2
+  criticalMultiplier: 2.48
+  energyCost: 9.7
+  recovery: 0.6896551
+  comboAttacks: 1
+  attackDuration: 0.32
+  hitbox: {x: 9, y: 1}
+  projectile: 1
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 12
+  projectileCount: 3
+  bounces: 1
+  piercing: 1
+  elemental: 1
+  specialEffect: "Quemadura durante 4s garantizado al impactar; onda de dano en un radio de 2m (80%). Coste: 9.7 energia por ataque."
+  specialEffects: 0200000006000000
+  specialEffectChance: 0.8
+  specialEffectPower: 2.3
+  effectColor: {r: 1, g: 0.18, b: 0.02, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 180

@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_Raijin
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Raijin
+  description: 'Estocadas muy rapidas con cadenas de hasta tres enemigos. Principal:
+    rayos encadenados (100% al impactar). Adicionales (80% cada uno): onda de 2m,
+    desgasta escudo. Coste: 4.5 energia por ataque.'
+  icon: {fileID: -1735647852, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: -1735647852, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 3
+  rarity: 4
+  spriteSheet: {fileID: 0}
+  spriteColumn: 0
+  spriteRow: 0
+  damage: 39
+  attackSpeed: 3.125
+  range: 3.8
+  knockback: 3.5
+  criticalChance: 0.14
+  criticalMultiplier: 2.4
+  energyCost: 4.5
+  recovery: 0.32
+  comboAttacks: 1
+  attackDuration: 0.192
+  hitbox: {x: 3.8, y: 0.5}
+  projectile: 0
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 15
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 1
+  specialEffect: 'Principal: rayos encadenados (100% al impactar). Adicionales (80%
+    cada uno): onda de 2m, desgasta escudo.'
+  specialEffects: 040000000600000011000000
+  specialEffectChance: 0.8
+  specialEffectPower: 2.5
+  effectColor: {r: 0.35, g: 0.6, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 280
+  attackPattern: 0
+  projectileMotion: 0
+  sweepAngle: 110
+  spreadAngle: 14
+  projectileLifetime: 3

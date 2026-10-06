@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: CrushingCyclops
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Crushing Cyclops
+  description: "\xC9lite gigantesco: embestida lenta pero devastadora."
+  sprite: {fileID: -721324719392653727, guid: 4e3bc575cbb0714458762138dccbbda8, type: 3}
+  animationFrames:
+  - {fileID: -721324719392653727, guid: 4e3bc575cbb0714458762138dccbbda8, type: 3}
+  - {fileID: -913691719737636634, guid: 4e3bc575cbb0714458762138dccbbda8, type: 3}
+  - {fileID: 3665950025816996241, guid: 4e3bc575cbb0714458762138dccbbda8, type: 3}
+  - {fileID: 7899537486643840411, guid: 4e3bc575cbb0714458762138dccbbda8, type: 3}
+  animationFramesPerSecond: 6
+  animations: {fileID: 0}
+  behaviours: 0000000002000000
+  maxHealth: 330
+  damage: 9
+  moveSpeed: 1.35
+  defense: 7
+  resistance: 0.3
+  knockbackResistance: 0.5833333
+  detectionRange: 8
+  attackRange: 1.6
+  preferredRange: 4
+  attackCooldown: 2.15
+  recoveryTime: 0.22
+  projectileSpeed: 7
+  projectileCount: 1
+  chargeTelegraph: 1
+  chargeSpeed: 11.5
+  chargeDistance: 6.2
+  teleportCooldown: 4.4
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.8
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 21
+  coinReward: 9

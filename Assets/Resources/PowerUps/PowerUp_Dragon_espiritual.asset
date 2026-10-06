@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8825836c08c26408845a49f1d2fe0e, type: 3}
+  m_Name: PowerUp_Dragon_espiritual
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase12.PowerUpData
+  displayName: "Drag\xF3n espiritual"
+  effectDescription: "Dragon permanente: 7 de dano cada 0.75s en 5m y quemadura de 1.5 cada 0.75s durante 3s. Convive con otros companeros."
+    de fuego peri\xF3dicos."
+  category: 10
+  rarity: 4
+  price: 145
+  stackMode: 0
+  maximumStacks: 99
+  icon: {fileID: -2010156172, guid: 3e8e125f71cdc5a438bb5453f3871caf, type: 3}
+  iconSheet: {fileID: 2800000, guid: 3e8e125f71cdc5a438bb5453f3871caf, type: 3}
+  iconColumn: 5
+  iconRow: 76
+  effectId: dragon_espiritual
+  modifiers:
+    maxHealth: 0
+    moveSpeed: 0
+    damage: 0
+    attackSpeed: 0
+    criticalChance: 0
+    defense: 0
+    projectileSpeed: 0
+    range: 0
+    cooldownReduction: 0
+    luck: 0
+  maxEnergy: 0
+  energyRegenerationPercent: 0
+  meleeDamagePercent: 0
+  magicDamagePercent: 0
+  criticalDamagePercent: 0
+  knockbackPercent: 0
+  dashCooldownPercent: 0
+  dashDistancePercent: 0
+  shopDiscountPercent: 0

@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58478c6b83404eac9cd56195c12b7cc0, type: 3}
+  m_Name: GameSfxBank
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Audio.GameSfxBank
+  swordSwing:
+  - {fileID: 8300000, guid: 179ca57cd75be144e8169ca3bfaaeda3, type: 3}
+  - {fileID: 8300000, guid: 624d4dfb8a3554b4993b9a27b8b18564, type: 3}
+  - {fileID: 8300000, guid: 865426632b40d844e9522226388731cc, type: 3}
+  swordImpact:
+  - {fileID: 8300000, guid: c5e631bccd9035f4591002fc03b96d6f, type: 3}
+  - {fileID: 8300000, guid: 9d164c24be7a29c4b832d869e9ae71e4, type: 3}
+  bowShot:
+  - {fileID: 8300000, guid: 501ab24c6fcf14648bc807841f0af8e1, type: 3}
+  - {fileID: 8300000, guid: 6673e0f19715f5c4591757d78f5588f0, type: 3}
+  weaponCharge:
+  - {fileID: 8300000, guid: f826c5556ff1259439b91a5a69013cde, type: 3}
+  - {fileID: 8300000, guid: 4e1f3ae0f67fb8649ada426922e6d5ad, type: 3}
+  heavySwing:
+  - {fileID: 8300000, guid: 892ccf7bcd00add4e9b95a784eecac33, type: 3}
+  - {fileID: 8300000, guid: e2831b3aaecd3024ab6b8bb16d3df8a2, type: 3}
+  heavyImpact:
+  - {fileID: 8300000, guid: 689a6f650f028a145a8cb9bbfcb1f142, type: 3}
+  magicCast:
+  - {fileID: 8300000, guid: 1ab763d4186691b4586d5607ee9c6606, type: 3}
+  - {fileID: 8300000, guid: 19e1a05c82af6e649ae0319ddf69b206, type: 3}
+  - {fileID: 8300000, guid: 69cc74acfeacdf84eb1adcf747265a10, type: 3}
+  darkMagicCast:
+  - {fileID: 8300000, guid: 30cb2391ae725d643a230236d2b2ff33, type: 3}
+  magicImpact:
+  - {fileID: 8300000, guid: 909938a21d0fc1f4d89fef8bc5fe0350, type: 3}
+  darkMagicImpact:
+  - {fileID: 8300000, guid: 382fe848d5d022643b090129c7475d78, type: 3}
+  - {fileID: 8300000, guid: 186eb3197fc29694f816e18aba19fea5, type: 3}
+  electric:
+  - {fileID: 8300000, guid: de1c8f59198d3694b8465362b7c2ca47, type: 3}
+  ice:
+  - {fileID: 8300000, guid: d010746cce38edb4189deb2032b91680, type: 3}
+  explosion:
+  - {fileID: 8300000, guid: b8643532ee337dd479d928aaf56ff6c2, type: 3}
+  - {fileID: 8300000, guid: d3f77d4a5baa0ce4095307c55874ff62, type: 3}
+  wave:
+  - {fileID: 8300000, guid: a22054cb5cf5f9240ac213598a53f0b8, type: 3}
+  stun:
+  - {fileID: 8300000, guid: 3a328583c43efc248ad83146ca0f05c8, type: 3}
+  - {fileID: 8300000, guid: 3c867b6bee7c04940803326fd03fa905, type: 3}
+  playerHurt:
+  - {fileID: 8300000, guid: 09154cc05b3bdb541b112a25ab0dd419, type: 3}
+  - {fileID: 8300000, guid: d26fc48c8758dc041865b2356a710d80, type: 3}
+  playerDeath:
+  - {fileID: 8300000, guid: 120c0b6e44c1f584bbf7566679494536, type: 3}
+  dash:
+  - {fileID: 8300000, guid: 2d230e567292fb14f89d647a71f47afd, type: 3}
+  - {fileID: 8300000, guid: eb30d0fc6d18b6f428826807fc4095d4, type: 3}
+  enemyAttack:
+  - {fileID: 8300000, guid: bdf7080384073f8479f236d9607fd4ca, type: 3}
+  - {fileID: 8300000, guid: eea55b6ff5aea514da380631dabce01d, type: 3}
+  enemySpecial:
+  - {fileID: 8300000, guid: e2831b3aaecd3024ab6b8bb16d3df8a2, type: 3}
+  enemyHurt:
+  - {fileID: 8300000, guid: a206c0e65c806a34ba7599b751f07f7c, type: 3}
+  - {fileID: 8300000, guid: 17ded4a0b7f93df47a3d38619d88e8be, type: 3}
+  enemyDeath:
+  - {fileID: 8300000, guid: 8c8a056ef6860cf40a6f5c50aa4fa869, type: 3}
+  coin:
+  - {fileID: 8300000, guid: 96961c101291a3f4bba49768dcf922ec, type: 3}
+  - {fileID: 8300000, guid: 236ca125b1b7a6a4493a9edec98fc55e, type: 3}
+  energy:
+  - {fileID: 8300000, guid: 70bf4f4635a943b45991c67086df8544, type: 3}
+  health:
+  - {fileID: 8300000, guid: ff6179e7ff620d44ab6751dc796788d5, type: 3}
+  chestOpen:
+  - {fileID: 8300000, guid: c7521b1939fca55489f41915081cf75a, type: 3}
+  - {fileID: 8300000, guid: f3536633f7846b442a1d939e6ba0b051, type: 3}
+  doorOpen:
+  - {fileID: 8300000, guid: 61da8a60691bfe249a5782c6451c685d, type: 3}
+  doorClose:
+  - {fileID: 8300000, guid: cd267d1bce78dd14b983295213891fc2, type: 3}
+  shield:
+  - {fileID: 8300000, guid: bf8510b5bada6d1479d29790d938196a, type: 3}
+  uiConfirm:
+  - {fileID: 8300000, guid: 4a1e92b747fe3994d9a5a0be036d190b, type: 3}
+  - {fileID: 8300000, guid: ff40d559088e29d4db9497e921168b70, type: 3}
+  uiDeny:
+  - {fileID: 8300000, guid: 83c8ed3bae1b95447843e1f4ad9d6bc9, type: 3}
+  shopBuy:
+  - {fileID: 8300000, guid: 9e0de444d6fd3044ab880015d701dc22, type: 3}
+  pickup:
+  - {fileID: 8300000, guid: 5104ece730c20bc4b9667a5cd2d329fd, type: 3}
+  powerUp:
+  - {fileID: 8300000, guid: e295e8f7c02fe574f8f496ca53d056dc, type: 3}
+  - {fileID: 8300000, guid: 9968397ac9e8471408623cee1bdfc6a9, type: 3}
+  consumable:
+  - {fileID: 8300000, guid: 7e2e6711ad4ba654ea82a6646c3a6370, type: 3}
+  portal:
+  - {fileID: 8300000, guid: 48382b1c3842f8b4ab07c76731eebbde, type: 3}
+  roomClear:
+  - {fileID: 8300000, guid: 9968397ac9e8471408623cee1bdfc6a9, type: 3}
+  footstep:
+  - {fileID: 8300000, guid: 83c9865b113425e43abf43539109df0e, type: 3}
+  - {fileID: 8300000, guid: bc05c3d93e1ade649934192c8b6de8d2, type: 3}
+  - {fileID: 8300000, guid: 7c85ec6afd909f94183416e0b86c68fb, type: 3}
+  cardReveal:
+  - {fileID: 8300000, guid: 19e1a05c82af6e649ae0319ddf69b206, type: 3}
+  - {fileID: 8300000, guid: c7c06ed80ca34434ea3f236b4065f114, type: 3}
+  - {fileID: 8300000, guid: 5982cf95a1be8df448c8596fc6aecbb1, type: 3}

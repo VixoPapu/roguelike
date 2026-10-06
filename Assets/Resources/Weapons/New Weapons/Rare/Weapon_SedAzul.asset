@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_SedAzul
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Sed azul
+  description: 'Barrido que devuelve energia por enemigo golpeado. Principal: recupera
+    energia por impacto (100% al impactar). Adicionales (55% cada uno): aturdimiento.
+    Coste: 3.5 energia por ataque.'
+  icon: {fileID: 4145218069449456390, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: 4145218069449456390, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 0
+  rarity: 2
+  spriteSheet: {fileID: 0}
+  spriteColumn: 0
+  spriteRow: 0
+  damage: 23
+  attackSpeed: 1.8182
+  range: 1.8
+  knockback: 3.5
+  criticalChance: 0.11
+  criticalMultiplier: 2.2
+  energyCost: 3.5
+  recovery: 0.55
+  comboAttacks: 3
+  attackDuration: 0.33
+  hitbox: {x: 1.8, y: 1}
+  projectile: 0
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 12
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 1
+  specialEffect: 'Principal: recupera energia por impacto (100% al impactar). Adicionales
+    (55% cada uno): aturdimiento.'
+  specialEffects: 0f00000005000000
+  specialEffectChance: 0.55
+  specialEffectPower: 1.4
+  effectColor: {r: 0.1, g: 0.95, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 105
+  attackPattern: 0
+  projectileMotion: 0
+  sweepAngle: 110
+  spreadAngle: 14
+  projectileLifetime: 3

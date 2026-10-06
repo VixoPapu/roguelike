@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8825836c08c26408845a49f1d2fe0e, type: 3}
+  m_Name: PowerUp_Ojo_del_vacio
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase12.PowerUpData
+  displayName: "Ojo del vac\xEDo"
+  effectDescription: "Cada copia: -5 de vida maxima (tambien recupera esa cantidad al aumentar); +25 puntos porcentuales de probabilidad de critico."
+  category: 12
+  rarity: 5
+  price: 115
+  stackMode: 0
+  maximumStacks: 99
+  icon: {fileID: 1115838758, guid: 3e8e125f71cdc5a438bb5453f3871caf, type: 3}
+  iconSheet: {fileID: 2800000, guid: 3e8e125f71cdc5a438bb5453f3871caf, type: 3}
+  iconColumn: 4
+  iconRow: 79
+  effectId: ojo_del_vacio
+  modifiers:
+    maxHealth: -5
+    moveSpeed: 0
+    damage: 0
+    attackSpeed: 0
+    criticalChance: 0.25
+    defense: 0
+    projectileSpeed: 0
+    range: 0
+    cooldownReduction: 0
+    luck: 0
+  maxEnergy: 0
+  energyRegenerationPercent: 0
+  meleeDamagePercent: 0
+  magicDamagePercent: 0
+  criticalDamagePercent: 0
+  knockbackPercent: 0
+  dashCooldownPercent: 0
+  dashDistancePercent: 0
+  shopDiscountPercent: 0

@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_HeavyCrossbow
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Ballesta pesada
+  description: "Proyectil f\xEDsico veloz con penetraci\xF3n."
+  icon: {fileID: 8884527435117691603, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: 8884527435117691603, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 6
+  rarity: 1
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 19
+  spriteRow: 1
+  damage: 25
+  attackSpeed: 1.25
+  range: 9
+  knockback: 3.5
+  criticalChance: 0.1
+  criticalMultiplier: 2.12
+  energyCost: 0
+  recovery: 0.8
+  comboAttacks: 1
+  attackDuration: 0.32
+  hitbox: {x: 9, y: 1}
+  projectile: 1
+  charged: 0
+  chargeTime: 1
+  projectileSpeed: 16
+  projectileCount: 1
+  bounces: 0
+  piercing: 1
+  elemental: 0
+  specialEffect: Sin poder especial.
+  specialEffects: 
+  specialEffectChance: 0
+  specialEffectPower: 1
+  effectColor: {r: 1, g: 1, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 55

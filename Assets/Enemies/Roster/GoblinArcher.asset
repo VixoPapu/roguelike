@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: GoblinArcher
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Goblin Archer
+  description: "Tirador r\xE1pido que kitea al jugador."
+  sprite: {fileID: 8348939962086424694, guid: 4ff2a885dd262fd42a939c34559ce767, type: 3}
+  animationFrames:
+  - {fileID: 8348939962086424694, guid: 4ff2a885dd262fd42a939c34559ce767, type: 3}
+  - {fileID: -2848155067032456354, guid: 4ff2a885dd262fd42a939c34559ce767, type: 3}
+  - {fileID: -3964078496243890386, guid: 4ff2a885dd262fd42a939c34559ce767, type: 3}
+  - {fileID: 8759611775677415122, guid: 4ff2a885dd262fd42a939c34559ce767, type: 3}
+  animationFramesPerSecond: 8
+  animations: {fileID: 0}
+  behaviours: 0100000007000000
+  maxHealth: 30
+  damage: 3
+  moveSpeed: 3.2
+  defense: 0
+  resistance: 0.03
+  knockbackResistance: 0
+  detectionRange: 8
+  attackRange: 1
+  preferredRange: 4.6
+  attackCooldown: 0.95
+  recoveryTime: 0.22
+  projectileSpeed: 9
+  projectileCount: 1
+  chargeTelegraph: 0.55
+  chargeSpeed: 9
+  chargeDistance: 5
+  teleportCooldown: 4.4
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.28
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 2
+  coinReward: 1

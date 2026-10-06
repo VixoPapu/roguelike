@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18903698c7a9c649b22609a8a857dff, type: 3}
+  m_Name: Weapon_ArcBow
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.WeaponData
+  weaponName: Arco voltaico
+  description: "Rayos encadenados garantizado al impactar. Coste: 4.4 energia por ataque."
+  icon: {fileID: 5822938708679568371, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  sprite: {fileID: 5822938708679568371, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  type: 5
+  rarity: 2
+  spriteSheet: {fileID: 2800000, guid: badaa3ee7ddbc0248908231bd491a1c0, type: 3}
+  spriteColumn: 15
+  spriteRow: 4
+  damage: 23
+  attackSpeed: 2.25
+  range: 8.5
+  knockback: 2
+  criticalChance: 0.16
+  criticalMultiplier: 2.24
+  energyCost: 4.4
+  recovery: 0.44444445
+  comboAttacks: 1
+  attackDuration: 0.27555555
+  hitbox: {x: 8.5, y: 1}
+  projectile: 1
+  charged: 1
+  chargeTime: 1.1
+  projectileSpeed: 13
+  projectileCount: 1
+  bounces: 0
+  piercing: 0
+  elemental: 1
+  specialEffect: "Rayos encadenados garantizado al impactar. Coste: 4.4 energia por ataque."
+  specialEffects: 04000000
+  specialEffectChance: 0.55
+  specialEffectPower: 1.25
+  effectColor: {r: 0.2, g: 0.65, b: 1, a: 1}
+  visualEffect: {fileID: 0}
+  attackSound: {fileID: 0}
+  price: 82

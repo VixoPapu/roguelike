@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3359cd8d04b42904eb7b5a535688507d, type: 3}
+  m_Name: DefaultWeaponLoadout
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.DefaultWeaponLoadout
+  primary: {fileID: 11400000, guid: 12bc9678257d8274884fc38d4e88ee97, type: 2}
+  secondary: {fileID: 11400000, guid: 301771b6b635cef4285d981c9681d51f, type: 2}
+  availableWeapons:
+  - {fileID: 11400000, guid: 12bc9678257d8274884fc38d4e88ee97, type: 2}
+  - {fileID: 11400000, guid: a70157f156c2c3340ae44fabcc450829, type: 2}
+  - {fileID: 11400000, guid: 71e1eb6ad429aba41957a0357545b04a, type: 2}
+  - {fileID: 11400000, guid: 81d99ef13d7b449449d40afbba05a699, type: 2}
+  - {fileID: 11400000, guid: 57867603b0bccfe4e884c7cbd18165c6, type: 2}
+  - {fileID: 11400000, guid: 301771b6b635cef4285d981c9681d51f, type: 2}
+  - {fileID: 11400000, guid: 0a52846b9c3de83448e116ee4d8e458f, type: 2}
+  - {fileID: 11400000, guid: 5ad070b027a9be94c9d6b0a40ab4a078, type: 2}

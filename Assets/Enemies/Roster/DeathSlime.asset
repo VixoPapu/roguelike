@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb030fa7362bc364d8f0ea63d68d72c1, type: 3}
+  m_Name: DeathSlime
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase3.EnemyData
+  enemyName: Death Slime
+  description: Masa corrosiva; lenta, pero con resistencia alta.
+  sprite: {fileID: 2299928196995773351, guid: bef220bf41844864da13a08da3391939, type: 3}
+  animationFrames:
+  - {fileID: 2299928196995773351, guid: bef220bf41844864da13a08da3391939, type: 3}
+  - {fileID: 7187632925653240700, guid: bef220bf41844864da13a08da3391939, type: 3}
+  - {fileID: -90702126400323083, guid: bef220bf41844864da13a08da3391939, type: 3}
+  - {fileID: -1287628048685721915, guid: bef220bf41844864da13a08da3391939, type: 3}
+  animationFramesPerSecond: 6
+  animations: {fileID: 0}
+  behaviours: 00000000
+  maxHealth: 42
+  damage: 3
+  moveSpeed: 2.15
+  defense: 1
+  resistance: 0.3
+  knockbackResistance: 0.083333336
+  detectionRange: 8
+  attackRange: 1
+  preferredRange: 4
+  attackCooldown: 0.9
+  recoveryTime: 0.22
+  projectileSpeed: 7
+  projectileCount: 1
+  chargeTelegraph: 0.55
+  chargeSpeed: 9
+  chargeDistance: 5
+  teleportCooldown: 4.4
+  summonCooldown: 7
+  summonData: {fileID: 0}
+  visualScale: 1.2
+  alertSound: {fileID: 0}
+  attackSound: {fileID: 0}
+  hurtSound: {fileID: 0}
+  deathSound: {fileID: 0}
+  loot: []
+  experienceReward: 3
+  coinReward: 1

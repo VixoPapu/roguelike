@@ -72,6 +72,9 @@ namespace ProjectLike.Phase3
         bool returning;
         EnemyAttackStyle attackStyle;
         Color effectColor;
+        Sprite[] effectFrames;
+        float nextEffectFrame;
+        int effectFrame;
 
         void Awake()
         {
@@ -87,7 +90,8 @@ namespace ProjectLike.Phase3
             glowObject.transform.SetParent(transform, false);
             glowObject.transform.localScale = new Vector3(.34f, .19f, 1f);
             glow = glowObject.AddComponent<SpriteRenderer>();
-            glow.sprite = CombatFeedback.WhiteSprite;
+            glow.sprite = SoftGlowSprite.Sprite;
+            glow.sharedMaterial = SoftGlowSprite.Material;
             glow.color = new Color(1f, .16f, .035f, .32f);
             glow.sortingOrder = 24;
 
@@ -143,10 +147,23 @@ namespace ProjectLike.Phase3
             var lance = attackStyle == EnemyAttackStyle.BoneLance;
             var toxic = attackStyle == EnemyAttackStyle.ToxicVolley;
             var arcane = attackStyle == EnemyAttackStyle.ArcaneBurst || attackStyle == EnemyAttackStyle.BlinkStrike;
+            var yellowLightning = effectColor.r > .8f && effectColor.g > .55f && effectColor.b < .5f;
+            var effectName = attackStyle == EnemyAttackStyle.FireFan ? "proj_fireball" : arcane ? (yellowLightning ? "proj_lightning_4_Y" : "proj_lightning 4_B") : null;
+            effectFrames = string.IsNullOrEmpty(effectName) ? null : CombatVfxPool.LoadEffectFrames(effectName);
+            effectFrame = 0; nextEffectFrame = Time.time + .075f;
+            if (effectFrames != null && effectFrames.Length > 0) core.sprite = effectFrames[0];
+            else core.sprite = CombatFeedback.WhiteSprite;
             core.transform.localScale = lance ? new Vector3(.42f, .065f, 1f) : arcane ? new Vector3(.16f, .16f, 1f) : new Vector3(.2f, .085f, 1f);
-            glow.transform.localScale = lance ? new Vector3(.55f, .13f, 1f) : arcane ? new Vector3(.3f, .3f, 1f) : new Vector3(.34f, .19f, 1f);
+            if (effectFrames != null && effectFrames.Length > 0)
+            {
+                core.transform.localScale = Vector3.one * (attackStyle == EnemyAttackStyle.FireFan ? .2f : .24f);
+                core.color = Color.white;
+            }
+            glow.transform.localScale = lance ? new Vector3(.9f, .3f, 1f) : arcane ? new Vector3(.72f, .72f, 1f) : new Vector3(.75f, .75f, 1f);
             core.color = Color.Lerp(effectColor, Color.white, lance ? .65f : .35f);
             glow.color = new Color(effectColor.r, effectColor.g, effectColor.b, toxic ? .5f : .34f);
+            core.color = BloomColor(core.color);
+            glow.color = BloomColor(glow.color);
             trail.time = lance ? .16f : toxic ? .34f : .23f;
             trail.widthMultiplier = lance ? .72f : arcane ? 1.15f : 1f;
             var gradient = new Gradient();
@@ -156,14 +173,22 @@ namespace ProjectLike.Phase3
             trail.colorGradient = gradient;
         }
 
+        static Color BloomColor(Color color) => new Color(color.r * 1.55f, color.g * 1.55f, color.b * 1.55f, color.a);
+
         void Update()
         {
             if (ProjectLike.Phase12.TimeStopAbility.IsActive || returning) return;
             life -= Time.deltaTime;
             var pulse = 1f + Mathf.Sin((Time.time - launchedAt) * 22f) * .12f;
-            var baseGlow = attackStyle == EnemyAttackStyle.BoneLance ? new Vector3(.55f, .13f, 1f) : attackStyle == EnemyAttackStyle.ArcaneBurst || attackStyle == EnemyAttackStyle.BlinkStrike ? new Vector3(.3f, .3f, 1f) : new Vector3(.34f, .19f, 1f);
+            var baseGlow = attackStyle == EnemyAttackStyle.BoneLance ? new Vector3(.9f, .3f, 1f) : attackStyle == EnemyAttackStyle.ArcaneBurst || attackStyle == EnemyAttackStyle.BlinkStrike ? new Vector3(.72f, .72f, 1f) : new Vector3(.75f, .75f, 1f);
             glow.transform.localScale = baseGlow * pulse;
             if (attackStyle != EnemyAttackStyle.BoneLance) glow.transform.Rotate(0f, 0f, 210f * Time.deltaTime);
+            if (effectFrames != null && effectFrames.Length > 0 && Time.time >= nextEffectFrame)
+            {
+                effectFrame = (effectFrame + 1) % effectFrames.Length;
+                core.sprite = effectFrames[effectFrame];
+                nextEffectFrame = Time.time + .075f;
+            }
             if (body.linearVelocity.sqrMagnitude > .01f) transform.right = body.linearVelocity.normalized;
             if (life <= 0f) Release(false);
         }
@@ -204,7 +229,7 @@ namespace ProjectLike.Phase3
             returning = true;
             if (impact)
             {
-                CombatVfxPool.Instance.SpawnEnemyProjectileImpact(transform.position, body.linearVelocity.normalized);
+                CombatVfxPool.Instance.SpawnEnemyProjectileImpact(transform.position, body.linearVelocity.normalized, attackStyle);
                 CombatVfxPool.Instance.SpawnEnemyAbilityBurst(transform.position, attackStyle, effectColor);
             }
             if (pool) pool.Release(this);
@@ -217,6 +242,8 @@ namespace ProjectLike.Phase3
             trail.emitting = false;
             trail.Clear();
             owner = null;
+            effectFrames = null;
+            core.sprite = CombatFeedback.WhiteSprite;
         }
     }
 }

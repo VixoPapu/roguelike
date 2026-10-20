@@ -67,6 +67,27 @@ namespace ProjectLike.Phase8
             return SpawnPickup(loot, position, 1);
         }
 
+        public static int SpawnLegendaryWeaponRewards(Vector2 position, int count, float luck)
+        {
+            var catalog = WeaponCatalog.All;
+            if (catalog == null || catalog.Count == 0) return 0;
+            var choices = new List<WeaponData>();
+            foreach (var weapon in catalog)
+                if (weapon && weapon.rarity == WeaponRarity.Legendary) choices.Add(weapon);
+            if (choices.Count == 0) return 0;
+            var spawned = 0;
+            for (var i = 0; i < Mathf.Max(1, count); i++)
+            {
+                var index = UnityEngine.Random.Range(0, choices.Count);
+                var weapon = choices[index];
+                if (choices.Count > 1) choices.RemoveAt(index);
+                var angle = i / (float)Mathf.Max(1, count) * Mathf.PI * 2f;
+                var offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * (.72f + i * .08f);
+                if (SpawnWeapon(weapon, LootRarity.Legendary, position + offset, true)) spawned++;
+            }
+            return spawned;
+        }
+
         public static int SpawnTableCapped(LootTable table, Vector2 position, int rolls, float luck, LootRarity maximumRarity)
         {
             if (!table || table.entries == null) return 0;

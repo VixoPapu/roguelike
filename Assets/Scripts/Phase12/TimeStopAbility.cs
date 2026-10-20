@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using ProjectLike.Phase1;
 using ProjectLike.Phase2;
+using ProjectLike.Phase3;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -82,6 +83,7 @@ namespace ProjectLike.Phase12
             sceneCamera = Camera.main;
             if (sceneCamera) { cameraColor = sceneCamera.backgroundColor; var g = cameraColor.grayscale; sceneCamera.backgroundColor = new Color(g, g, g, cameraColor.a); }
             FreezeWorld();
+            KharosBossAI.SetEncounterMusicPaused(true);
             if (visuals) visuals.SpawnDashGhost(Vector2.zero, true, TrailGradient.Evaluate(0f));
             PlaySound(startAudio); Pulse(true); Notice("TIEMPO DETENIDO");
             return true;
@@ -164,6 +166,7 @@ namespace ProjectLike.Phase12
             running = false;
             DashVfxPool.ClearTimeStopTrail();
             if (active == this) { active = null; Physics2D.simulationMode = previousPhysicsMode; Time.timeScale = previousScale; }
+            KharosBossAI.SetEncounterMusicPaused(false);
             foreach (var script in frozen) if (script) script.enabled = true;
             frozen.Clear();
             foreach (var entry in playerAnimators) if (entry.Key) entry.Key.updateMode = entry.Value;

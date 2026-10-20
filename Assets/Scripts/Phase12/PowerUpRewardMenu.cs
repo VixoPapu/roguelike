@@ -64,7 +64,7 @@ namespace ProjectLike.Phase12
             foreach (var power in all)
             {
                 if (!power || inventory && !inventory.CanAcquire(power)) continue;
-                var copies = power.rarity == LootRarity.Common ? 10 : power.rarity == LootRarity.Uncommon ? 7 : power.rarity == LootRarity.Rare ? 4 : power.rarity == LootRarity.Epic ? 2 : 1;
+                var copies = power.rarity == LootRarity.Common ? 10 : power.rarity == LootRarity.Uncommon ? 7 : power.rarity == LootRarity.Rare ? 4 : power.rarity == LootRarity.Epic ? 2 : power.rarity == LootRarity.Corrupted ? 3 : 1;
                 for (var i = 0; i < copies; i++) pool.Add(power);
             }
             while (offers.Count < 3 && pool.Count > 0)
@@ -85,7 +85,15 @@ namespace ProjectLike.Phase12
             TextElement("Subtitle", dim, new Vector2(.5f, 1f), new Vector2(.5f, 1f), new Vector2(.5f, 1f), new Vector2(0, -72), new Vector2(760, 24), 11, TextAnchor.MiddleCenter, "LA ELECCIÓN SE APLICARÁ A ESTA RUN", new Color(.68f, .7f, .75f));
             var cards = Rect("Cards", dim, new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(.5f, .5f), new Vector2(0, -13), new Vector2(780, 350));
             for (var i = 0; i < offers.Count; i++) BuildCard(cards, i, offers[i]);
-            TextElement("Hint", dim, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 20), new Vector2(700, 24), 11, TextAnchor.MiddleCenter, "CLICK O TECLAS [1 / 2 / 3]", new Color(.78f, .8f, .84f));
+            var hint = "CLICK O TECLAS [1 / 2 / 3]";
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            hint += "  ·  F5 = REFRESCAR OFERTAS (TEST)";
+            var testButtonRect = Rect("TestReroll", dim, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 57), new Vector2(230, 32));
+            var testButtonImage = testButtonRect.gameObject.AddComponent<Image>(); testButtonImage.color = new Color(.18f, .12f, .26f, .98f);
+            var testButton = testButtonRect.gameObject.AddComponent<Button>(); testButton.targetGraphic = testButtonImage; testButton.onClick.AddListener(RerollOffersForTesting);
+            TextElement("TestRerollLabel", testButtonRect, Vector2.zero, Vector2.one, new Vector2(.5f, .5f), Vector2.zero, Vector2.zero, 10, TextAnchor.MiddleCenter, "REFRESCAR OFERTAS · TEST", new Color(.9f, .76f, 1f));
+#endif
+            TextElement("Hint", dim, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 20), new Vector2(700, 24), 11, TextAnchor.MiddleCenter, hint, new Color(.78f, .8f, .84f));
             StartCoroutine(RevealCards());
         }
 
@@ -175,9 +183,28 @@ namespace ProjectLike.Phase12
             callback?.Invoke();
         }
 
+        void RerollOffersForTesting()
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (resolving || !IsOpen) return;
+            var cards = transform.Find("Dim/Cards");
+            if (!cards) return;
+            StopAllCoroutines();
+            for (var i = cards.childCount - 1; i >= 0; i--) Destroy(cards.GetChild(i).gameObject);
+            offers.Clear();
+            cardViews.Clear();
+            RollOffers();
+            for (var i = 0; i < offers.Count; i++) BuildCard(cards, i, offers[i]);
+            StartCoroutine(RevealCards());
+#endif
+        }
+
         void Update()
         {
             if (Time.frameCount <= openedFrame || Keyboard.current == null) return;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            if (Keyboard.current.f5Key.wasPressedThisFrame) RerollOffersForTesting();
+#endif
             if (Keyboard.current.digit1Key.wasPressedThisFrame || Keyboard.current.numpad1Key.wasPressedThisFrame) Select(0);
             if (Keyboard.current.digit2Key.wasPressedThisFrame || Keyboard.current.numpad2Key.wasPressedThisFrame) Select(1);
             if (Keyboard.current.digit3Key.wasPressedThisFrame || Keyboard.current.numpad3Key.wasPressedThisFrame) Select(2);

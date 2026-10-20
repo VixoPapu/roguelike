@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace ProjectLike.Online
 {
-    [Flags] public enum CoopButtons { Attack = 1, Dash = 2, Interact = 4, Consumable = 8, Ability = 16, Primary = 32, Secondary = 64 }
+    [Flags] public enum CoopButtons { Attack = 1, Dash = 2, Interact = 4, Consumable = 8, Ability = 16, Primary = 32, Secondary = 64, Qte = 128 }
     [Serializable] public struct CoopControls
     {
         public Vector2 move, aim;
@@ -57,6 +57,7 @@ namespace ProjectLike.Online
             Set(ref value, CoopButtons.Secondary, k?.digit2Key, g?.dpad.right);
             Set(ref value, CoopButtons.Primary, k?.numpad1Key, null);
             Set(ref value, CoopButtons.Secondary, k?.numpad2Key, null);
+            Set(ref value, CoopButtons.Qte, k?.rKey, g?.buttonWest);
             return value;
         }
         static void Set(ref CoopControls value, CoopButtons key, UnityEngine.InputSystem.Controls.ButtonControl a, UnityEngine.InputSystem.Controls.ButtonControl b)

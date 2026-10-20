@@ -44,7 +44,6 @@ namespace ProjectLike.Phase10
             previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
             ownsPause = true;
             Time.timeScale = 0f;
-            GameSfx.Play(SfxCue.UiConfirm, customer.transform.position, .5f, true);
             EnsureEventSystem(); BuildCanvas(); Rebuild();
         }
 
@@ -136,9 +135,9 @@ namespace ProjectLike.Phase10
         public static string RarityName(LootRarity rarity) => rarity == LootRarity.Common ? "COMÚN" : rarity == LootRarity.Uncommon ? "POCO COMÚN" : rarity == LootRarity.Rare ? "RARO" : rarity == LootRarity.Epic ? "ÉPICO" : rarity == LootRarity.Legendary ? "LEGENDARIO" : "CORRUPTO";
         static Color CardBackground(LootRarity rarity) => new Color(.10f, .10f, .10f, 1f);
         Sprite ItemSprite(LootData item) { if (item.icon) return item.icon; if (item.powerUp && item.powerUp.icon) return item.powerUp.icon; if (item.worldSprite) return item.worldSprite; if (item.weapon) return CombatFeedback.GetWeaponSprite(item.weapon); if (item.consumable && item.consumable.icon) return item.consumable.icon; return CombatFeedback.WhiteSprite; }
-        void Buy(int index) { var success=shop.TryPurchase(index, player, out var message); GameSfx.Play(success?SfxCue.ShopBuy:SfxCue.UiDeny,player.transform.position,success?.75f:.62f,true); feedback.color = success ? new Color(.35f, 1f, .5f) : new Color(1f, .35f, .3f); feedback.text = message.ToUpperInvariant(); if (success && shop.IsLockedFor(player)) StartCoroutine(CloseExhausted()); }
+        void Buy(int index) { var success=shop.TryPurchase(index, player, out var message); feedback.color = success ? new Color(.35f, 1f, .5f) : new Color(1f, .35f, .3f); feedback.text = message.ToUpperInvariant(); if (success && shop.IsLockedFor(player)) StartCoroutine(CloseExhausted()); }
         IEnumerator CloseExhausted() { yield return new WaitForSecondsRealtime(.7f); Close(); }
-        void Reroll() { var success = shop.TryReroll(stats, out var message); GameSfx.Play(success?SfxCue.UiConfirm:SfxCue.UiDeny,player.transform.position,success?.6f:.62f,true); feedback.color = success ? new Color(.35f, 1f, .5f) : new Color(1f, .35f, .3f); feedback.text = message.ToUpperInvariant(); }
+        void Reroll() { var success = shop.TryReroll(stats, out var message); feedback.color = success ? new Color(.35f, 1f, .5f) : new Color(1f, .35f, .3f); feedback.text = message.ToUpperInvariant(); }
         void Update() { if (Time.frameCount <= openedFrame || Keyboard.current == null) return; if (Keyboard.current.digit1Key.wasPressedThisFrame) Buy(0); if (Keyboard.current.digit2Key.wasPressedThisFrame) Buy(1); if (Keyboard.current.digit3Key.wasPressedThisFrame) Buy(2); if (Keyboard.current.rKey.wasPressedThisFrame) Reroll(); if (Keyboard.current.escapeKey.wasPressedThisFrame || Keyboard.current.eKey.wasPressedThisFrame) Close(); }
         public void Close() { RestoreTime(); if (shop) shop.NotifyClosed(this); Destroy(gameObject); }
         void OnDestroy() { RestoreTime(); }

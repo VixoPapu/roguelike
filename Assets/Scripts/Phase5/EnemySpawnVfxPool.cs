@@ -65,11 +65,13 @@ namespace ProjectLike.Phase5
         EnemySpawnVfxPool owner;
         SpriteRenderer ring;
         SpriteRenderer core;
+        SpriteRenderer[] runeRenderers;
         Transform runes;
         ParticleSystem particles;
         Color color;
         float startedAt;
         float releaseAt;
+        float visualScale = 1f;
         bool spawning;
         bool built;
 
@@ -108,6 +110,7 @@ namespace ProjectLike.Phase5
                 renderer.sprite = CombatFeedback.WhiteSprite;
                 renderer.sortingOrder = 8;
             }
+            runeRenderers = runes.GetComponentsInChildren<SpriteRenderer>(true);
 
             if (!particleMaterial) particleMaterial = new Material(Shader.Find("Sprites/Default"));
             particles = gameObject.AddComponent<ParticleSystem>();
@@ -141,11 +144,11 @@ namespace ProjectLike.Phase5
             color = markerColor;
             startedAt = Time.time;
             releaseAt = Time.time + 15f;
+            visualScale = 1f;
             spawning = false;
             ring.color = new Color(color.r, color.g, color.b, .78f);
             core.color = new Color(color.r, color.g, color.b, .18f);
-            foreach (var rune in runes.GetComponentsInChildren<SpriteRenderer>())
-                rune.color = new Color(color.r, color.g, color.b, .9f);
+            SetRuneAlpha(.9f);
             var main = particles.main;
             main.startColor = new ParticleSystem.MinMaxGradient(color, Color.white);
             particles.Clear(true);
@@ -163,6 +166,12 @@ namespace ProjectLike.Phase5
             core.color = new Color(1f, 1f, 1f, .85f);
         }
 
+        public void ConfigureTelegraph(float scale)
+        {
+            visualScale = Mathf.Max(.1f, scale);
+            releaseAt = Time.time + 12f;
+        }
+
         void Update()
         {
             if (!owner) return;
@@ -171,7 +180,7 @@ namespace ProjectLike.Phase5
             if (spawning)
             {
                 var remaining = Mathf.Clamp01((releaseAt - Time.time) / .32f);
-                transform.localScale = Vector3.one * Mathf.Lerp(1.65f, .15f, 1f - remaining);
+                transform.localScale = Vector3.one * visualScale * Mathf.Lerp(1.65f, .15f, 1f - remaining);
                 ring.color = new Color(1f, 1f, 1f, remaining);
                 core.color = new Color(color.r, color.g, color.b, remaining);
                 return;
@@ -179,11 +188,20 @@ namespace ProjectLike.Phase5
 
             var reveal = Mathf.Clamp01((Time.time - startedAt) * 7f);
             var pulse = 1f + Mathf.Sin((Time.time - startedAt) * 8f) * .08f;
-            transform.localScale = Vector3.one * reveal * pulse;
+            var fadeOut = Mathf.Clamp01((releaseAt - Time.time) / .3f);
+            transform.localScale = Vector3.one * visualScale * reveal * pulse;
             ring.transform.localRotation = Quaternion.Euler(0f, 0f, (Time.time - startedAt) * 70f);
             runes.localRotation = Quaternion.Euler(0f, 0f, -(Time.time - startedAt) * 105f);
-            var glow = .12f + Mathf.PingPong((Time.time - startedAt) * .55f, .25f);
+            var glow = (.12f + Mathf.PingPong((Time.time - startedAt) * .55f, .25f)) * fadeOut;
+            ring.color = new Color(color.r, color.g, color.b, .78f * fadeOut);
+            SetRuneAlpha(.9f * fadeOut);
             core.color = new Color(color.r, color.g, color.b, glow);
+        }
+
+        void SetRuneAlpha(float alpha)
+        {
+            if (runeRenderers == null) return;
+            foreach (var rune in runeRenderers) if (rune) rune.color = new Color(color.r, color.g, color.b, alpha);
         }
 
         static Sprite GetRingSprite()

@@ -162,7 +162,6 @@ namespace ProjectLike.Phase10
             SelectCustomer(player);
             if (IsLockedFor(player))
             {
-                GameSfx.Play(SfxCue.UiDeny, player.transform.position, .62f, true);
                 var hud = FindAnyObjectByType<PixelHUDCanvas>();
                 if (hud) hud.ShowFeedback("Ya compraste 3 objetos en esta tienda", new Color(1f, .35f, .3f));
                 return;
@@ -319,7 +318,7 @@ namespace ProjectLike.Phase10
                     if (!powerUp) continue;
                     var item = Loot(powerUp.displayName, LootType.Upgrade, powerUp.rarity, BalancedPrice(powerUp.rarity, LootType.Upgrade));
                     item.powerUp = powerUp; item.icon = powerUp.icon; item.description = powerUp.effectDescription; item.modifiers = powerUp.modifiers;
-                    var weight = powerUp.rarity == LootRarity.Common ? 7 : powerUp.rarity == LootRarity.Uncommon ? 5 : powerUp.rarity == LootRarity.Rare ? 3 : powerUp.rarity == LootRarity.Epic ? 2 : 1;
+                    var weight = powerUp.rarity == LootRarity.Common ? 7 : powerUp.rarity == LootRarity.Uncommon ? 5 : powerUp.rarity == LootRarity.Rare ? 3 : powerUp.rarity == LootRarity.Epic ? 2 : powerUp.rarity == LootRarity.Corrupted ? 2 : 1;
                     for (var i = 0; i < weight; i++) catalog.upgrades.Add(item);
                     if (powerUp.rarity == LootRarity.Legendary || powerUp.rarity == LootRarity.Corrupted) catalog.exclusives.Add(item);
                 }

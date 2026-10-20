@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 namespace ProjectLike.Phase1
 {
@@ -38,6 +39,10 @@ namespace ProjectLike.Phase1
         int resolutionIndex;
         bool fullScreen;
         bool starting;
+        AudioSource musicSource;
+        VideoPlayer backgroundVideo;
+        RenderTexture backgroundTexture;
+        RawImage backgroundImage;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Bootstrap() => Show();
@@ -77,9 +82,54 @@ namespace ProjectLike.Phase1
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
             canvasGroup.alpha = 0f;
 
-            var background = Rect("BlackBackground", transform, Vector2.zero, Vector2.one, Vector2.one * .5f, Vector2.zero, Vector2.zero);
-            var backgroundImage = background.gameObject.AddComponent<Image>();
-            backgroundImage.color = Color.black;
+            var background = Rect("MenuBackground", transform, Vector2.zero, Vector2.one, Vector2.one * .5f, Vector2.zero, Vector2.zero);
+            backgroundImage = background.gameObject.AddComponent<RawImage>();
+            backgroundImage.color = Color.white;
+            backgroundImage.raycastTarget = false;
+            var backgroundClip = Resources.Load<VideoClip>("Images/Menu/background");
+            if (backgroundClip)
+            {
+                var scale = Mathf.Min(1f, 1920f / Mathf.Max(backgroundClip.width, backgroundClip.height));
+                var width = Mathf.Max(1, Mathf.RoundToInt(backgroundClip.width * scale));
+                var height = Mathf.Max(1, Mathf.RoundToInt(backgroundClip.height * scale));
+                backgroundTexture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32)
+                {
+                    name = "MainMenuVideoTexture",
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp
+                };
+                backgroundTexture.Create();
+                backgroundImage.texture = backgroundTexture;
+                backgroundVideo = gameObject.AddComponent<VideoPlayer>();
+                backgroundVideo.playOnAwake = false;
+                backgroundVideo.source = VideoSource.VideoClip;
+                backgroundVideo.clip = backgroundClip;
+                backgroundVideo.renderMode = VideoRenderMode.RenderTexture;
+                backgroundVideo.targetTexture = backgroundTexture;
+                backgroundVideo.isLooping = true;
+                backgroundVideo.skipOnDrop = true;
+                backgroundVideo.audioOutputMode = VideoAudioOutputMode.None;
+                backgroundVideo.waitForFirstFrame = true;
+                backgroundVideo.prepareCompleted += OnBackgroundPrepared;
+                backgroundVideo.Prepare();
+            }
+            else
+            {
+                var oldBackground = Resources.Load<Sprite>("Images/Menu/background");
+                if (oldBackground) backgroundImage.texture = oldBackground.texture;
+            }
+
+            var audio = Resources.Load<MenuAudioConfig>("MenuAudioConfig");
+            if (audio && audio.menuMusic)
+            {
+                musicSource = gameObject.AddComponent<AudioSource>();
+                musicSource.clip = audio.menuMusic;
+                musicSource.loop = true;
+                musicSource.playOnAwake = false;
+                musicSource.volume = 0f;
+                musicSource.Play();
+                StartCoroutine(FadeMusicIn());
+            }
 
             mainPage = Rect("MainPage", background, Vector2.zero, Vector2.one, Vector2.one * .5f, Vector2.zero, Vector2.zero);
             BuildMainPage();
@@ -92,27 +142,21 @@ namespace ProjectLike.Phase1
 
         void BuildMainPage()
         {
-            var logoRect = Rect("GameLogo", mainPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(0f, 142f), new Vector2(500f, 220f));
+            var logoRect = Rect("GameLogo", mainPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(0f, 160f), new Vector2(600f, 195f));
             var logo = logoRect.gameObject.AddComponent<Image>();
-            var sprites = Resources.LoadAll<Sprite>(LogoPath);
-            logo.sprite = sprites != null && sprites.Length > 0 ? sprites[0] : Resources.Load<Sprite>(LogoPath);
+            logo.sprite = Resources.Load<Sprite>(LogoPath);
             logo.preserveAspect = true;
             logo.raycastTarget = false;
-            var logoGlow = logoRect.gameObject.AddComponent<Shadow>();
-            logoGlow.effectColor = new Color(.55f, .12f, .95f, .5f);
-            logoGlow.effectDistance = new Vector2(3f, -3f);
-            logoRect.gameObject.AddComponent<MenuLogoMotion>();
-
-            firstMainButton = MenuButton(mainPage, "SINGLE PLAYER", new Vector2(0f, 20f), StartSinglePlayer);
-            MenuButton(mainPage, "MULTIPLAYER", new Vector2(0f, -30f), MultiplayerPending);
-            MenuButton(mainPage, "SETTINGS", new Vector2(0f, -80f), ShowSettingsPage);
-            MenuButton(mainPage, "SALIR", new Vector2(0f, -130f), QuitGame);
-            status = Label("Status", mainPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(0f, -190f), new Vector2(650f, 28f), 13, "", new Color(.72f, .4f, 1f));
+            firstMainButton = MenuButton(mainPage, "Iniciar Partida", new Vector2(0f, -20f), StartSinglePlayer);
+            MenuButton(mainPage, "Multiplayer", new Vector2(0f, -66f), MultiplayerPending);
+            MenuButton(mainPage, "Opciones", new Vector2(0f, -112f), ShowSettingsPage);
+            MenuButton(mainPage, "Salir", new Vector2(0f, -158f), QuitGame);
+            status = Label("Status", mainPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(0f, -204f), new Vector2(650f, 28f), 13, "", new Color(.88f, .9f, .94f));
         }
 
         void BuildSettingsPage()
         {
-            Label("SettingsTitle", settingsPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(0f, 188f), new Vector2(500f, 55f), 32, "SETTINGS", Color.white);
+            Label("SettingsTitle", settingsPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(0f, 188f), new Vector2(500f, 55f), 32, "OPCIONES", Color.white);
             Label("VolumeLabel", settingsPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(-165f, 105f), new Vector2(210f, 34f), 17, "VOLUMEN", Color.white).alignment = TextAnchor.MiddleLeft;
             volumeValue = Label("VolumeValue", settingsPage, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, new Vector2(174f, 105f), new Vector2(90f, 34f), 16, "100%", new Color(.72f, .4f, 1f));
             volumeSlider = BuildSlider(settingsPage, new Vector2(25f, 105f));
@@ -123,18 +167,19 @@ namespace ProjectLike.Phase1
             firstSettingsButton = SettingsButton(settingsPage, "RESOLUCIÓN", new Vector2(0f, 42f), CycleResolution, out resolutionValue);
             SettingsButton(settingsPage, "PANTALLA COMPLETA", new Vector2(0f, -12f), ToggleFullscreen, out fullscreenValue);
             SettingsButton(settingsPage, "V-SYNC", new Vector2(0f, -66f), ToggleVSync, out vSyncValue);
-            MenuButton(settingsPage, "VOLVER", new Vector2(0f, -148f), ShowMainPage);
+            MenuButton(settingsPage, "PRUEBA DE JEFE", new Vector2(0f, -120f), StartKharosTest);
+            MenuButton(settingsPage, "VOLVER", new Vector2(0f, -170f), ShowMainPage);
             RefreshSettingsText();
         }
 
         Button MenuButton(Transform parent, string text, Vector2 position, UnityEngine.Events.UnityAction action)
         {
-            var rect = Rect(text.Replace(" ", "") + "Button", parent, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, position, new Vector2(380f, 42f));
+            var rect = Rect(text.Replace(" ", "") + "Button", parent, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, position, new Vector2(380f, 38f));
             var hit = rect.gameObject.AddComponent<Image>(); hit.color = new Color(0f, 0f, 0f, .001f);
-            var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = hit; button.onClick.AddListener(() => { GameSfx.Play(SfxCue.UiConfirm, Vector2.zero, .58f, true); action?.Invoke(); });
-            var left = Label("LeftOrnament", rect, new Vector2(0f, .5f), new Vector2(0f, .5f), Vector2.one * .5f, new Vector2(35f, 0f), new Vector2(45f, 36f), 18, "◆", new Color(.65f, .25f, 1f));
-            var right = Label("RightOrnament", rect, new Vector2(1f, .5f), new Vector2(1f, .5f), Vector2.one * .5f, new Vector2(-35f, 0f), new Vector2(45f, 36f), 18, "◆", new Color(.65f, .25f, 1f));
-            var label = Label("Label", rect, Vector2.zero, Vector2.one, Vector2.one * .5f, Vector2.zero, Vector2.zero, 21, text, Color.white);
+            var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = hit; button.onClick.AddListener(() => action?.Invoke());
+            var left = Label("LeftOrnament", rect, new Vector2(0f, .5f), new Vector2(0f, .5f), Vector2.one * .5f, new Vector2(35f, 0f), new Vector2(45f, 36f), 17, "◆", new Color(.82f, .86f, .94f));
+            var right = Label("RightOrnament", rect, new Vector2(1f, .5f), new Vector2(1f, .5f), Vector2.one * .5f, new Vector2(-35f, 0f), new Vector2(45f, 36f), 17, "◆", new Color(.82f, .86f, .94f));
+            var label = Label("Label", rect, Vector2.zero, Vector2.one, Vector2.one * .5f, Vector2.zero, Vector2.zero, 19, text, Color.white);
             rect.gameObject.AddComponent<MainMenuButtonVisual>().Configure(label, left, right);
             return button;
         }
@@ -144,7 +189,7 @@ namespace ProjectLike.Phase1
             var rect = Rect(title.Replace(" ", "") + "Setting", parent, new Vector2(.5f, .5f), new Vector2(.5f, .5f), Vector2.one * .5f, position, new Vector2(520f, 44f));
             var hit = rect.gameObject.AddComponent<Image>(); hit.color = new Color(.06f, .04f, .08f, .94f);
             var outline = rect.gameObject.AddComponent<Outline>(); outline.effectColor = new Color(.28f, .15f, .38f); outline.effectDistance = new Vector2(2f, -2f);
-            var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = hit; button.onClick.AddListener(() => { GameSfx.Play(SfxCue.UiConfirm, Vector2.zero, .5f, true); action?.Invoke(); });
+            var button = rect.gameObject.AddComponent<Button>(); button.targetGraphic = hit; button.onClick.AddListener(() => action?.Invoke());
             var label = Label("Name", rect, Vector2.zero, Vector2.one, new Vector2(0f, .5f), new Vector2(18f, 0f), new Vector2(300f, 40f), 15, title, Color.white); label.alignment = TextAnchor.MiddleLeft;
             value = Label("Value", rect, Vector2.zero, Vector2.one, new Vector2(1f, .5f), new Vector2(-18f, 0f), new Vector2(210f, 40f), 14, "", new Color(.72f, .4f, 1f)); value.alignment = TextAnchor.MiddleRight;
             rect.gameObject.AddComponent<SettingsRowVisual>().Configure(hit, label, value);
@@ -252,14 +297,24 @@ namespace ProjectLike.Phase1
             ProjectLike.Online.CoopSession.OpenLobby();
         }
 
+        void AchievementsPending() { if (status) status.text = "ACHIEVEMENTS COMING SOON"; }
+        void ExtrasPending() { if (status) status.text = "EXTRAS COMING SOON"; }
+
         void StartSinglePlayer()
         {
             if (starting) return;
             starting = true;
-            StartCoroutine(BeginRun());
+            StartCoroutine(BeginRun(false));
         }
 
-        IEnumerator BeginRun()
+        void StartKharosTest()
+        {
+            if (starting) return;
+            starting = true;
+            StartCoroutine(BeginRun(true));
+        }
+
+        IEnumerator BeginRun(bool testKharos)
         {
             for (var elapsed = 0f; elapsed < .18f; elapsed += Time.unscaledDeltaTime)
             {
@@ -269,8 +324,10 @@ namespace ProjectLike.Phase1
             Time.timeScale = 1f;
             var player = FindAnyObjectByType<PlayerController>();
             var generator = FindAnyObjectByType<DungeonGenerator>();
-            if (generator && player) generator.RestartRun(player);
-            else if (!generator) new GameObject("DungeonGenerator").AddComponent<DungeonGenerator>();
+            if (!generator) generator = new GameObject("DungeonGenerator").AddComponent<DungeonGenerator>();
+            if (testKharos) generator.StartKharosTest(player);
+            else if (player) generator.RestartRun(player);
+            LevelIntroOverlay.Show(generator ? generator.CurrentWorld : 1, generator ? generator.CurrentLevel : 1);
             Destroy(gameObject);
         }
 
@@ -293,15 +350,61 @@ namespace ProjectLike.Phase1
             canvasGroup.alpha = 1f;
         }
 
+        IEnumerator FadeMusicIn()
+        {
+            const float duration = 1.8f;
+            var elapsed = 0f;
+            while (elapsed < duration && musicSource)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                musicSource.volume = Mathf.Lerp(0f, .42f, Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+            if (musicSource) musicSource.volume = .42f;
+        }
+
         void Update()
         {
+            UpdateBackgroundVideoCrop();
             var back = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame || Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame;
             if (settingsPage && settingsPage.gameObject.activeSelf && back) ShowMainPage();
         }
 
+        void UpdateBackgroundVideoCrop()
+        {
+            if (!backgroundImage || !backgroundVideo || !backgroundVideo.clip || Screen.height <= 0) return;
+            var videoAspect = backgroundVideo.clip.width / (float)backgroundVideo.clip.height;
+            var screenAspect = Screen.width / (float)Screen.height;
+            if (screenAspect > videoAspect)
+            {
+                var height = videoAspect / screenAspect;
+                backgroundImage.uvRect = new Rect(0f, (1f - height) * .5f, 1f, height);
+            }
+            else
+            {
+                var width = screenAspect / videoAspect;
+                backgroundImage.uvRect = new Rect((1f - width) * .5f, 0f, width, 1f);
+            }
+        }
+
         void OnDestroy()
         {
+            if (backgroundVideo)
+            {
+                backgroundVideo.prepareCompleted -= OnBackgroundPrepared;
+                backgroundVideo.Stop();
+            }
+            if (backgroundTexture)
+            {
+                backgroundTexture.Release();
+                Destroy(backgroundTexture);
+            }
             if (instance == this) instance = null;
+        }
+
+        void OnBackgroundPrepared(VideoPlayer player)
+        {
+            if (player == backgroundVideo && this && isActiveAndEnabled) player.Play();
         }
 
         static void Select(Button button)
@@ -320,6 +423,8 @@ namespace ProjectLike.Phase1
 
         static Font Font()
         {
+            var audio = Resources.Load<MenuAudioConfig>("MenuAudioConfig");
+            if (audio && audio.menuFont) return audio.menuFont;
             var hud = FindAnyObjectByType<PixelHUDCanvas>();
             return hud && hud.pixelFont ? hud.pixelFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
@@ -348,8 +453,8 @@ namespace ProjectLike.Phase1
         public void OnPointerExit(PointerEventData eventData) { if (!EventSystem.current || EventSystem.current.currentSelectedGameObject != gameObject) SetFocus(false); }
         public void OnSelect(BaseEventData eventData) => SetFocus(true);
         public void OnDeselect(BaseEventData eventData) => SetFocus(false);
-        void SetFocus(bool value) { focused = value; if (label) label.color = value ? new Color(.82f, .58f, 1f) : Color.white; if (left) left.gameObject.SetActive(value); if (right) right.gameObject.SetActive(value); }
-        void Update() { var target = focused ? 1.045f + Mathf.Sin(Time.unscaledTime * 7f) * .008f : 1f; transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * target, 1f - Mathf.Exp(-15f * Time.unscaledDeltaTime)); }
+        void SetFocus(bool value) { focused = value; if (label) label.color = value ? new Color(.9f, .9f, 1f) : Color.white; if (left) left.gameObject.SetActive(value); if (right) right.gameObject.SetActive(value); }
+        void Update() { var target = focused ? 1.025f : 1f; transform.localScale = Vector3.Lerp(transform.localScale, Vector3.one * target, 1f - Mathf.Exp(-15f * Time.unscaledDeltaTime)); }
     }
 
     public sealed class SettingsRowVisual : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler

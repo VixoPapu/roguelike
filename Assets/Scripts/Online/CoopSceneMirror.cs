@@ -4,6 +4,7 @@ using System.Linq;
 using ProjectLike.Phase1;
 using ProjectLike.Phase2;
 using ProjectLike.Audio;
+using ProjectLike.Phase3;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +32,18 @@ namespace ProjectLike.Online
         bool downedView;
         float normalCameraSize;
         AudioLowPassFilter lowPass;
+        GameObject bossHudRoot, remoteQteRoot;
+        KharosBossCinematicOverlay remoteBossCinematic;
+        CanvasGroup bossHudGroup;
+        Image bossHealthFill;
+        RectTransform bossHealthFillRect;
+        Text bossNameLabel, bossPhaseLabel, bossHealthLabel, remoteQteLabel;
+        AudioSource remoteBossMusic;
+        string remoteBossClip;
+        float targetBossMusicVolume, localCameraTrauma;
+        int remoteCinematicPhase;
+        float remoteCinematicProgress;
+        float remoteCinematicCameraSize, remoteCinematicCameraRoll;
         readonly Dictionary<UnityEngine.Object, int> identities = new Dictionary<UnityEngine.Object, int>();
         int nextIdentity;
         int Identity(UnityEngine.Object value)
@@ -62,6 +75,8 @@ namespace ProjectLike.Online
             Resources.Load<GameSfxBank>("Audio/GameSfxBank");
             Resources.LoadAll<ProjectLike.Phase12.PowerUpData>("PowerUps");
             Resources.LoadAll<ProjectLike.Phase2.WeaponData>("Weapons");
+            var kharos = Resources.Load<ProjectLike.Phase3.EnemyData>("Enemy_Kharos");
+            if (kharos && kharos.bossMusic) clips[kharos.bossMusic.name] = kharos.bossMusic;
             RefreshClips();
             if (Camera.main) normalCameraSize = Camera.main.orthographicSize;
         }
@@ -246,10 +261,39 @@ namespace ProjectLike.Online
                 Destroy(pair.Value.root); draws.Remove(pair.Key);
             }
             var local = world.players?.FirstOrDefault(p => p.id == CoopSession.Instance.LocalId);
-            if (local != null) { cameraTarget = new Vector3(local.position.x, local.position.y, Camera.main ? Camera.main.transform.position.z : -10f); hasCameraTarget = true; }
+            ApplyBossHud(world);
+            ApplyBossCinematic(world);
+            ApplyRootQte(local);
+            ApplyBossMusic(world);
+            if (world.cameraTrauma > localCameraTrauma + .08f) localCameraTrauma = world.cameraTrauma;
+            if (local != null) { var focus = world.bossCinematicPhase != 0 ? world.bossCameraPosition : local.position; cameraTarget = new Vector3(focus.x, focus.y, Camera.main ? Camera.main.transform.position.z : -10f); hasCameraTarget = true; }
             if (Camera.main) Camera.main.backgroundColor = world.background;
         }
         static Color Gray(Color c) => new Color(c.grayscale, c.grayscale, c.grayscale, c.a);
+
+        void ApplyBossCinematic(CoopWorld world)
+        {
+            if (world.bossCinematicPhase != remoteCinematicPhase && world.bossCinematicPhase != 0) localCameraTrauma = Mathf.Max(localCameraTrauma, world.bossCinematicPhase == 1 ? .18f : .4f);
+            if (world.bossCinematicPhase != remoteCinematicPhase)
+            {
+                if (world.bossCinematicPhase == 0 && remoteCinematicPhase != 0) StartCoroutine(KharosCinematicHudFader.FadeIn(.45f));
+                else if (world.bossCinematicPhase != 0) StartCoroutine(KharosCinematicHudFader.FadeOut(.42f));
+            }
+            remoteCinematicPhase = world.bossCinematicPhase;
+            remoteCinematicProgress = world.bossCinematicProgress;
+            remoteCinematicCameraSize = world.bossCameraSize;
+            remoteCinematicCameraRoll = world.bossCameraRoll;
+            if (world.bossCinematicPhase == 0)
+            {
+                if (remoteBossCinematic) { remoteBossCinematic.FadeAndDestroy(.25f); remoteBossCinematic = null; }
+                return;
+            }
+            if (!remoteBossCinematic) remoteBossCinematic = KharosBossCinematicOverlay.Create();
+            var boss = Resources.Load<ProjectLike.Phase3.EnemyData>("Enemy_Kharos");
+            var intro = world.bossCinematicPhase == 1;
+            remoteBossCinematic.SetSequence(world.bossCinematicPhase, world.bossCinematicProgress,
+                intro ? "KHAROS" : "KHAROS DERROTADO", intro ? "EL GUARDIÁN DE LAS RAÍCES" : "EL BOSQUE VUELVE A RESPIRAR", boss ? boss.sprite : null);
+        }
         void LateUpdate()
         {
             if (!CoopSession.IsClient || !CoopSession.Playing) return;
@@ -265,8 +309,111 @@ namespace ProjectLike.Online
                 var camera = Camera.main; camera.orthographic = true;
                 camera.transform.position = Vector3.Distance(camera.transform.position, cameraTarget) > 8f ? cameraTarget : Vector3.Lerp(camera.transform.position, cameraTarget, alpha);
                 float size = (normalCameraSize <= 0f ? camera.orthographicSize : normalCameraSize) * (downedView ? .58f : 1f);
+                if (remoteCinematicPhase != 0)
+                {
+                    var progress = Mathf.Clamp01(remoteCinematicProgress);
+                    if (remoteCinematicCameraSize > .01f) size = remoteCinematicCameraSize;
+                    camera.transform.rotation = Quaternion.Euler(0f, 0f, remoteCinematicCameraRoll);
+                }
+                else camera.transform.rotation = Quaternion.identity;
                 camera.orthographicSize = Mathf.Lerp(camera.orthographicSize, size, alpha);
+                if (localCameraTrauma > .001f)
+                {
+                    camera.transform.position += (Vector3)(UnityEngine.Random.insideUnitCircle * localCameraTrauma * .18f);
+                    localCameraTrauma = Mathf.MoveTowards(localCameraTrauma, 0f, 3.5f * Time.unscaledDeltaTime);
+                }
             }
+            if (remoteBossMusic) remoteBossMusic.volume = Mathf.MoveTowards(remoteBossMusic.volume, targetBossMusicVolume, Time.unscaledDeltaTime * .4f);
+            if (remoteBossMusic && targetBossMusicVolume <= 0f && remoteBossMusic.volume <= .001f)
+            { remoteBossMusic.Stop(); Destroy(remoteBossMusic.gameObject); remoteBossMusic = null; remoteBossClip = null; }
+        }
+
+        void ApplyBossHud(CoopWorld world)
+        {
+            if (!world.bossActive)
+            {
+                if (bossHudGroup) bossHudGroup.alpha = Mathf.MoveTowards(bossHudGroup.alpha, 0f, Time.unscaledDeltaTime * 3f);
+                if (bossHudGroup && bossHudGroup.alpha <= .001f)
+                {
+                    Destroy(bossHudRoot); bossHudRoot = null; bossHudGroup = null;
+                    bossHealthFill = null; bossHealthFillRect = null; bossNameLabel = null; bossPhaseLabel = null; bossHealthLabel = null;
+                }
+                return;
+            }
+            EnsureBossHud();
+            if (!bossHudGroup) return;
+            bossHudGroup.alpha = Mathf.MoveTowards(bossHudGroup.alpha, 1f, Time.unscaledDeltaTime * 3f);
+            bossNameLabel.text = string.IsNullOrEmpty(world.bossName) ? "KHAROS" : world.bossName;
+            bossPhaseLabel.text = world.bossPhase ?? "";
+            var ratio = world.bossMaxHealth > 0f ? Mathf.Clamp01(world.bossHealth / world.bossMaxHealth) : 0f;
+            bossHealthFillRect.sizeDelta = new Vector2(514f * ratio, 10f);
+            bossHealthFill.color = ratio <= .5f ? new Color(.86f, .18f, .08f) : new Color(.56f, .11f, .12f);
+            bossHealthLabel.text = Mathf.CeilToInt(world.bossHealth) + " / " + Mathf.CeilToInt(world.bossMaxHealth);
+        }
+
+        void EnsureBossHud()
+        {
+            if (bossHudRoot) return;
+            bossHudRoot = new GameObject("RemoteKharosBossHUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(CanvasGroup));
+            bossHudRoot.transform.SetParent(transform, false);
+            var canvas = bossHudRoot.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 4600;
+            var scaler = bossHudRoot.GetComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(960f, 540f);
+            bossHudGroup = bossHudRoot.GetComponent<CanvasGroup>(); bossHudGroup.blocksRaycasts = false; bossHudGroup.interactable = false; bossHudGroup.alpha = 0f;
+            UiImage("TopFiligree", bossHudRoot.transform, new Vector2(0f, -2f), new Vector2(520f, 2f), new Color(.64f, .57f, .29f, .82f));
+            UiImage("BottomFiligree", bossHudRoot.transform, new Vector2(0f, -77f), new Vector2(420f, 1.5f), new Color(.3f, .57f, .32f, .68f));
+            bossNameLabel = UiText("BossName", bossHudRoot.transform, new Vector2(0f, -7f), new Vector2(570f, 26f), 23, new Color(.97f, .9f, .68f));
+            bossPhaseLabel = UiText("BossPhase", bossHudRoot.transform, new Vector2(0f, -29f), new Vector2(570f, 16f), 12, new Color(.57f, .78f, .54f));
+            var background = UiImage("BossHealthBackground", bossHudRoot.transform, new Vector2(0f, -52f), new Vector2(520f, 16f), new Color(.025f, .035f, .027f, .72f));
+            var fill = UiImage("BossHealthFill", background.transform, new Vector2(3f, -3f), new Vector2(514f, 10f), new Color(.56f, .11f, .12f));
+            bossHealthFillRect = fill.rectTransform; bossHealthFillRect.anchorMin = bossHealthFillRect.anchorMax = new Vector2(0f, 1f); bossHealthFillRect.pivot = new Vector2(0f, 1f); bossHealthFill = fill;
+            bossHealthLabel = UiText("BossHealthValue", bossHudRoot.transform, new Vector2(0f, -50f), new Vector2(180f, 19f), 13, new Color(.98f, .94f, .8f));
+        }
+
+        void ApplyRootQte(CoopActor local)
+        {
+            if (local == null || !local.rootQte)
+            {
+                if (remoteQteRoot) remoteQteRoot.SetActive(false);
+                return;
+            }
+            if (!remoteQteRoot)
+            {
+                remoteQteRoot = new GameObject("RemoteKharosRootQTE", typeof(RectTransform), typeof(Canvas)); remoteQteRoot.transform.SetParent(transform, false);
+                var canvas = remoteQteRoot.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 4500;
+                var scaler = remoteQteRoot.AddComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize; scaler.referenceResolution = new Vector2(960f, 540f);
+                remoteQteLabel = UiText("RootQteLabel", remoteQteRoot.transform, new Vector2(0f, -101f), new Vector2(760f, 54f), 23, Color.white);
+            }
+            remoteQteRoot.SetActive(true);
+            remoteQteLabel.text = "ATRAPADO - PULSA RAPIDO R " + Mathf.Clamp(local.qtePresses, 0, 5) + "/5";
+        }
+
+        void ApplyBossMusic(CoopWorld world)
+        {
+            targetBossMusicVolume = world.bossActive && !string.IsNullOrEmpty(world.bossMusic) ? Mathf.Clamp(world.bossMusicVolume, 0f, .35f) : 0f;
+            var clipName = world.bossActive ? world.bossMusic : "";
+            if (string.IsNullOrEmpty(clipName)) { remoteBossClip = ""; return; }
+            if (clipName == remoteBossClip) return;
+            if (remoteBossMusic) { remoteBossMusic.Stop(); Destroy(remoteBossMusic.gameObject); remoteBossMusic = null; }
+            remoteBossClip = clipName;
+            if (string.IsNullOrEmpty(clipName)) return;
+            if (!clips.TryGetValue(clipName, out var clip)) { RefreshClips(); clips.TryGetValue(clipName, out clip); }
+            if (!clip) return;
+            var root = new GameObject("RemoteKharosMusic"); root.transform.SetParent(transform, false);
+            remoteBossMusic = root.AddComponent<AudioSource>(); remoteBossMusic.clip = clip; remoteBossMusic.loop = true; remoteBossMusic.playOnAwake = false; remoteBossMusic.ignoreListenerPause = true; remoteBossMusic.volume = 0f; remoteBossMusic.spatialBlend = 0f; remoteBossMusic.Play();
+        }
+
+        static Image UiImage(string name, Transform parent, Vector2 position, Vector2 size, Color color)
+        {
+            var element = new GameObject(name, typeof(RectTransform), typeof(Image)); element.transform.SetParent(parent, false);
+            var rect = element.GetComponent<RectTransform>(); rect.anchorMin = rect.anchorMax = new Vector2(.5f, 1f); rect.pivot = new Vector2(.5f, 1f); rect.anchoredPosition = position; rect.sizeDelta = size;
+            var image = element.GetComponent<Image>(); image.color = color; image.raycastTarget = false; return image;
+        }
+
+        Text UiText(string name, Transform parent, Vector2 position, Vector2 size, int fontSize, Color color)
+        {
+            var element = new GameObject(name, typeof(RectTransform), typeof(Text)); element.transform.SetParent(parent, false);
+            var rect = element.GetComponent<RectTransform>(); rect.anchorMin = rect.anchorMax = new Vector2(.5f, 1f); rect.pivot = new Vector2(.5f, 1f); rect.anchoredPosition = position; rect.sizeDelta = size;
+            var text = element.GetComponent<Text>(); text.font = font ? font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.fontSize = fontSize; text.alignment = TextAnchor.MiddleCenter; text.color = color; text.raycastTarget = false; text.horizontalOverflow = HorizontalWrapMode.Overflow; text.verticalOverflow = VerticalWrapMode.Overflow; return text;
         }
         public void PlaySound(CoopSound sound)
         {

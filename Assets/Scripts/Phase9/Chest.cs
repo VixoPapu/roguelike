@@ -70,7 +70,7 @@ namespace ProjectLike.Phase1
             transform.localScale = Vector3.one;
             opened = true;
             opening = false;
-            prompt = "Cofre abierto";
+            prompt = "";
             ReleaseRewards(player, stats);
         }
 
@@ -78,8 +78,10 @@ namespace ProjectLike.Phase1
         {
             GetDropValues(out var coins, out var energy, out var healthChance, out var weaponChance, out var rarity);
             MobDropPool.Instance.SpawnDrops(transform.position, stats, Random.Range(coins.x, coins.y + 1), Random.Range(energy.x, energy.y + 1), healthChance);
-            if (lootTable && lootRolls > 0) LootSpawner.SpawnTableCapped(lootTable, transform.position, lootRolls, stats.luck, MaximumTableRarity());
-            if (Random.value <= weaponChance)
+            if (chestType == ChestType.Boss)
+                LootSpawner.SpawnLegendaryWeaponRewards(transform.position, 2, stats.luck);
+            else if (lootTable && lootRolls > 0) LootSpawner.SpawnTableCapped(lootTable, transform.position, lootRolls, stats.luck, MaximumTableRarity());
+            if (chestType != ChestType.Boss && Random.value <= weaponChance)
             {
                 var weapon = WeaponCatalog.Roll(ToWeaponRarity(MaximumTableRarity()), stats.luck);
                 if (weapon) LootSpawner.SpawnWeapon(weapon, (LootRarity)weapon.rarity, (Vector2)transform.position + Vector2.up * .55f, true);
@@ -98,7 +100,7 @@ namespace ProjectLike.Phase1
             if (chestType == ChestType.Rare) { coins = new Vector2Int(9, 17); energy = new Vector2Int(18, 34); healthChance = .1f; weaponChance = .85f; rarity = LootRarity.Rare; return; }
             if (chestType == ChestType.Cursed) { coins = new Vector2Int(12, 22); energy = new Vector2Int(20, 38); healthChance = 0f; weaponChance = 1f; rarity = LootRarity.Epic; return; }
             if (chestType == ChestType.Secret) { coins = new Vector2Int(16, 28); energy = new Vector2Int(28, 48); healthChance = .18f; weaponChance = 1f; rarity = LootRarity.Epic; return; }
-            if (chestType == ChestType.Boss) { coins = new Vector2Int(28, 48); energy = new Vector2Int(42, 72); healthChance = .35f; weaponChance = 1f; rarity = LootRarity.Legendary; return; }
+            if (chestType == ChestType.Boss) { coins = new Vector2Int(105, 145); energy = new Vector2Int(55, 85); healthChance = .4f; weaponChance = 1f; rarity = LootRarity.Legendary; return; }
             coins = new Vector2Int(4, 10); energy = new Vector2Int(10, 22); healthChance = .04f; weaponChance = .38f; rarity = LootRarity.Common;
         }
 

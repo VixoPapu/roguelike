@@ -122,6 +122,7 @@ namespace ProjectLike.Phase1
         [Min(0)] public float knockback = 4f;
         public Vector2 AimDirection { get; private set; } = Vector2.right;
         public bool IsInvulnerable => TimeStopAbility.PlayerTime < invulnerableUntil;
+        public bool AdminGodMode { get; set; }
         public float MovementAmount => moveInput.magnitude;
         public Vector2 MovementDirection => moveInput.sqrMagnitude > .01f ? moveInput.normalized : Vector2.zero;
         public bool IsDashing => dashing;
@@ -129,7 +130,7 @@ namespace ProjectLike.Phase1
         public bool IsInvisible { get; private set; }
         Rigidbody2D body; PlayerStats stats; SpriteRenderer sprite; Animator animator; PlayerVisuals visuals;
         Vector2 moveInput, velocity, dashDirection; float invulnerableUntil, nextDash, nextAttack, nextDashTrail, nextFootstep; float dashEnd;
-        bool dashing, dead;
+        bool dashing, dead, movementLocked;
         void Awake()
         {
             body = GetComponent<Rigidbody2D>(); stats = GetComponent<PlayerStats>(); sprite = GetComponentInChildren<SpriteRenderer>(); animator = GetComponentInChildren<Animator>(); visuals = GetComponent<PlayerVisuals>();
@@ -144,9 +145,10 @@ namespace ProjectLike.Phase1
             if (dead || CoopInput.Blocked(gameObject) || Time.timeScale <= 0f && !TimeStopAbility.IsActive) { moveInput = Vector2.zero; return; }
             var controls = CoopInput.For(gameObject);
             moveInput = controls.move;
+            if (movementLocked) moveInput = Vector2.zero;
             AimDirection = controls.aim;
             if (controls.Down(CoopButtons.Attack)) Attack();
-            if (controls.Down(CoopButtons.Dash)) TryDash();
+            if (!movementLocked && controls.Down(CoopButtons.Dash)) TryDash();
             if (dashing && TimeStopAbility.PlayerTime >= dashEnd) { dashing = false; velocity = Vector2.zero; }
             if (sprite && AimDirection.x != 0) sprite.flipX = AimDirection.x < 0;
             if (TimeStopAbility.IsActive) MoveInStoppedTime();
@@ -156,6 +158,7 @@ namespace ProjectLike.Phase1
         void FixedUpdate()
         {
             if (dead || CoopInput.Blocked(gameObject)) return;
+            if (movementLocked) { dashing = false; velocity = Vector2.zero; body.linearVelocity = Vector2.zero; return; }
             if (dashing) { body.MovePosition(body.position + dashDirection * dashSpeed * Time.fixedDeltaTime); if(TimeStopAbility.PlayerTime>=nextDashTrail){if(visuals)visuals.SpawnDashGhost(dashDirection);nextDashTrail=TimeStopAbility.PlayerTime+.035f;} }
             else { var powers=GetComponent<PowerUpRuntime>();var status=GetComponent<ElementalStatusEffects>();var target = moveInput * stats.moveSpeed*(powers?powers.CurrentMoveMultiplier:1f)*(status?status.SpeedMultiplier:1f); velocity = Vector2.MoveTowards(velocity, target, (target.sqrMagnitude > velocity.sqrMagnitude ? acceleration : deceleration) * Time.fixedDeltaTime); body.MovePosition(body.position + velocity * Time.fixedDeltaTime); }
         }
@@ -190,6 +193,7 @@ namespace ProjectLike.Phase1
         }
         public void TryDash() { var powers=GetComponent<PowerUpRuntime>();var mustPay=!powers||powers.DashCostsEnergy;if ((TimeStopAbility.PlayerTime < nextDash && !(powers&&powers.TryUseBonusDash())) || dashing || (mustPay&&stats&&!stats.TrySpendEnergy(dashEnergyCost))) return; dashDirection = moveInput.sqrMagnitude > .04f ? moveInput.normalized : AimDirection; dashing=true;var distance=powers?powers.DashDistanceMultiplier:1f; dashEnd=TimeStopAbility.PlayerTime+dashDuration*distance; nextDash=TimeStopAbility.PlayerTime+dashCooldown*(powers?powers.DashCooldownMultiplier:1f); nextDashTrail=TimeStopAbility.PlayerTime; invulnerableUntil=Mathf.Max(invulnerableUntil, TimeStopAbility.PlayerTime+dashInvulnerability); GameSfx.Play(SfxCue.Dash, transform.position, .65f); if(visuals)visuals.Dash();if(powers)powers.OnDash(); }
         public void GrantInvulnerability(float duration) { invulnerableUntil = Mathf.Max(invulnerableUntil, TimeStopAbility.PlayerTime + Mathf.Max(0f, duration)); }
+        public void SetMovementLocked(bool locked) { movementLocked = locked; if (locked) { moveInput = Vector2.zero; velocity = Vector2.zero; dashing = false; if (body) body.linearVelocity = Vector2.zero; } }
         public void SetInvisible(bool value)
         {
             IsInvisible = value;
@@ -202,7 +206,7 @@ namespace ProjectLike.Phase1
         }
         public void ReviveForCoop(bool restoreVitals = true)
         {
-            dead = false; dashing = false; velocity = Vector2.zero; moveInput = Vector2.zero;
+            dead = false; dashing = false; movementLocked = false; velocity = Vector2.zero; moveInput = Vector2.zero;
             body.simulated = true; body.linearVelocity = Vector2.zero;
             if (restoreVitals) stats.RestoreVitals(); SetInvisible(false);
             if (animator) { animator.Rebind(); animator.Update(0f); }
@@ -210,7 +214,7 @@ namespace ProjectLike.Phase1
         }
         public void RestartForNewRun()
         {
-            StopAllCoroutines(); dead = false; dashing = false; velocity = Vector2.zero; moveInput = Vector2.zero;
+            StopAllCoroutines(); dead = false; dashing = false; movementLocked = false; velocity = Vector2.zero; moveInput = Vector2.zero;
             invulnerableUntil = nextDash = nextAttack = nextDashTrail = dashEnd = 0f;
             body.simulated = true; body.linearVelocity = Vector2.zero; body.angularVelocity = 0f;
             SetInvisible(false); stats.ResetForNewRun();
@@ -222,7 +226,36 @@ namespace ProjectLike.Phase1
             if (visuals) visuals.RestoreForNewRun();
         }
         void Attack() { if(TimeStopAbility.PlayerTime<nextAttack)return; nextAttack=TimeStopAbility.PlayerTime+1f/Mathf.Max(.01f,stats.attackSpeed); if(animator)animator.SetTrigger("Attack"); if(visuals)visuals.Attack(); Debug.DrawRay(transform.position,AimDirection*stats.range,Color.yellow, .15f); }
-        public void TakeDamage(float amount, Vector2 sourcePosition) { if (dead || IsInvulnerable) return; var status=GetComponent<ElementalStatusEffects>();if(status)amount*=status.DamageTakenMultiplier; var before=stats.CurrentHealth+stats.CurrentShield;var shieldBefore=stats.CurrentShield; if (!stats.ReceiveDamage(amount)) return; var received=Mathf.Max(0f,before-stats.CurrentHealth-stats.CurrentShield); var away=((Vector2)transform.position-sourcePosition).normalized; if(away.sqrMagnitude<.01f)away=Vector2.up; GameSfx.Play(shieldBefore>0f?SfxCue.Shield:SfxCue.PlayerHurt,transform.position,.75f); CombatVfxPool.Instance.SpawnPlayerDamage(transform.position,received,away); invulnerableUntil=TimeStopAbility.PlayerTime+hitInvulnerability;var powers=GetComponent<PowerUpRuntime>();var force=(powers&&powers.Has("corazon_del_gigante")) ? .55f : 1f; body.AddForce(away*knockback*force, ForceMode2D.Impulse);if(powers)powers.OnDamaged(received,sourcePosition,shieldBefore>0f&&stats.CurrentShield<=0f); if(animator) animator.SetTrigger("Hit"); if(visuals)visuals.Hit(); }
+        public void TakeDamage(float amount, Vector2 sourcePosition) => TryTakeDamage(amount, sourcePosition);
+        public bool TryTakeContinuousDamage(float amount, Vector2 sourcePosition)
+        {
+            if (dead || AdminGodMode || dashing) return false;
+            var status = GetComponent<ElementalStatusEffects>(); if (status) amount *= status.DamageTakenMultiplier;
+            var before = stats.CurrentHealth + stats.CurrentShield; var shieldBefore = stats.CurrentShield;
+            if (!stats.ReceiveDamage(amount)) return false;
+            var received = Mathf.Max(0f, before - stats.CurrentHealth - stats.CurrentShield);
+            GameSfx.Play(shieldBefore > 0f ? SfxCue.Shield : SfxCue.PlayerHurt, transform.position, .3f);
+            CombatVfxPool.Instance.SpawnPlayerDamage(transform.position, received, ((Vector2)transform.position - sourcePosition).normalized);
+            if (animator) animator.SetTrigger("Hit"); if (visuals) visuals.Hit();
+            return true;
+        }
+        public bool TryTakeDamage(float amount, Vector2 sourcePosition)
+        {
+            if (dead || AdminGodMode || IsInvulnerable) return false;
+            var status = GetComponent<ElementalStatusEffects>(); if (status) amount *= status.DamageTakenMultiplier;
+            var before = stats.CurrentHealth + stats.CurrentShield; var shieldBefore = stats.CurrentShield;
+            if (!stats.ReceiveDamage(amount)) return false;
+            var received = Mathf.Max(0f, before - stats.CurrentHealth - stats.CurrentShield);
+            var away = ((Vector2)transform.position - sourcePosition).normalized; if (away.sqrMagnitude < .01f) away = Vector2.up;
+            GameSfx.Play(shieldBefore > 0f ? SfxCue.Shield : SfxCue.PlayerHurt, transform.position, .75f);
+            CombatVfxPool.Instance.SpawnPlayerDamage(transform.position, received, away);
+            invulnerableUntil = TimeStopAbility.PlayerTime + hitInvulnerability;
+            var powers = GetComponent<PowerUpRuntime>(); var force = (powers && powers.Has("corazon_del_gigante")) ? .55f : 1f;
+            body.AddForce(away * knockback * force, ForceMode2D.Impulse);
+            if (powers) powers.OnDamaged(received, sourcePosition, shieldBefore > 0f && stats.CurrentShield <= 0f);
+            if (animator) animator.SetTrigger("Hit"); if (visuals) visuals.Hit();
+            return true;
+        }
         void Die()
         {
             dead = true; velocity = Vector2.zero; dashing = false; body.simulated = false;
@@ -262,6 +295,7 @@ namespace ProjectLike.Phase1
             {
                 var candidate = hit.GetComponentInParent<IInteractable>();
                 if (candidate == null) continue;
+                if (string.IsNullOrWhiteSpace(candidate.Prompt)) continue;
                 if (candidate is LootPickup loot && (!loot.CanCollectBy(gameObject) || loot.data.autoPickup)) continue;
                 var next = ((Vector2)hit.transform.position - (Vector2)transform.position).sqrMagnitude;
                 if (next >= distance) continue;
@@ -296,17 +330,17 @@ namespace ProjectLike.Phase1
         }
         Text MakeText(string name,Vector2 pos,Vector2 size,int fontSize,Color color){var go=new GameObject(name);go.transform.SetParent(transform,false);var t=go.AddComponent<Text>();t.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");t.fontSize=fontSize;t.color=color; t.rectTransform.anchorMin=new Vector2(.5f,0);t.rectTransform.anchorMax=new Vector2(.5f,0);t.rectTransform.pivot=new Vector2(.5f,0);t.rectTransform.anchoredPosition=pos;t.rectTransform.sizeDelta=size;return t;}
         Image MakeBar(string name,Vector2 pos,Color color,out Text value,string icon){var iconText=MakeText(name+"Icon",new Vector2(24,pos.y-2),new Vector2(28,26),22,color);iconText.text=icon;var go=new GameObject(name);go.transform.SetParent(transform,false);var bg=go.AddComponent<Image>();bg.color=new Color(.10f,.10f,.12f,.92f);bg.rectTransform.anchorMin=new Vector2(0,1);bg.rectTransform.anchorMax=new Vector2(0,1);bg.rectTransform.pivot=new Vector2(0,1);bg.rectTransform.anchoredPosition=pos;bg.rectTransform.sizeDelta=new Vector2(184,24);var fillGo=new GameObject("Fill");fillGo.transform.SetParent(go.transform,false);var fill=fillGo.AddComponent<Image>();fill.color=color;fill.type=Image.Type.Filled;fill.fillMethod=Image.FillMethod.Horizontal;fill.rectTransform.anchorMin=Vector2.zero;fill.rectTransform.anchorMax=Vector2.one;fill.rectTransform.sizeDelta=Vector2.zero;value=MakeText(name+"Value",new Vector2(140,pos.y-2),new Vector2(180,26),18,Color.white);value.alignment=TextAnchor.MiddleCenter;return fill;}
-        void Update(){if(stats){healthText.text=$"{stats.CurrentHealth:0}/{stats.maxHealth:0}";shieldText.text=$"{stats.CurrentShield:0}/{stats.maxShield:0}";energyText.text=$"{stats.CurrentEnergy:0}/{stats.maxEnergy:0}";healthFill.fillAmount=stats.maxHealth>0?stats.CurrentHealth/stats.maxHealth:0;shieldFill.fillAmount=stats.maxShield>0?stats.CurrentShield/stats.maxShield:0;energyFill.fillAmount=stats.maxEnergy>0?stats.CurrentEnergy/stats.maxEnergy:0;}if(interaction){var hits=Physics2D.OverlapCircleAll(interaction.transform.position,interaction.radius,interaction.interactionLayers);string prompt="";foreach(var h in hits){var i=h.GetComponentInParent<IInteractable>();if(i!=null){prompt="[ E / A ]  "+i.Prompt;break;}}promptText.text=prompt;}}
+        void Update(){if(stats){healthText.text=$"{stats.CurrentHealth:0}/{stats.maxHealth:0}";shieldText.text=$"{stats.CurrentShield:0}/{stats.maxShield:0}";energyText.text=$"{stats.CurrentEnergy:0}/{stats.maxEnergy:0}";healthFill.fillAmount=stats.maxHealth>0?stats.CurrentHealth/stats.maxHealth:0;shieldFill.fillAmount=stats.maxShield>0?stats.CurrentShield/stats.maxShield:0;energyFill.fillAmount=stats.maxEnergy>0?stats.CurrentEnergy/stats.maxEnergy:0;}if(interaction){var hits=Physics2D.OverlapCircleAll(interaction.transform.position,interaction.radius,interaction.interactionLayers);string prompt="";foreach(var h in hits){var i=h.GetComponentInParent<IInteractable>();if(i==null||string.IsNullOrWhiteSpace(i.Prompt))continue;if(i is LootPickup loot&&(!loot.CanCollectBy(interaction.gameObject)||loot.data.autoPickup))continue;prompt="[ E / A ]  "+i.Prompt;break;}promptText.text=prompt;}}
     }
 
     public class PlayerVisuals : MonoBehaviour
     {
         [Header("Walk squash")]
-        [Min(1f)] public float walkCycleSpeed = 11f;
-        [Range(0f, .3f)] public float verticalSquash = .11f;
-        [Range(0f, .25f)] public float horizontalStretch = .055f;
-        [Range(0f, 15f)] public float walkTilt = 5f;
-        [Range(0f, .2f)] public float walkBob = .045f;
+        [Min(1f)] public float walkCycleSpeed = 7f;
+        [Range(0f, .3f)] public float verticalSquash = .2f;
+        [Range(0f, .25f)] public float horizontalStretch = .1f;
+        [Range(0f, 15f)] public float walkTilt = 11f;
+        [Range(0f, .2f)] public float walkBob = .12f;
 
         SpriteRenderer sourceRenderer;
         SpriteRenderer animatedRenderer;
@@ -326,17 +360,32 @@ namespace ProjectLike.Phase1
 
         void Awake()
         {
-            controller = GetComponent<PlayerController>();
-            sourceRenderer = GetComponent<SpriteRenderer>();
+            EnsureVisualReady();
+        }
+
+        void Start() { EnsureVisualReady(); }
+
+        bool EnsureVisualReady()
+        {
+            if (!controller) controller = GetComponent<PlayerController>();
+            var playerRenderer = GetComponent<SpriteRenderer>();
+            if (playerRenderer && sourceRenderer != playerRenderer)
+            {
+                sourceRenderer = playerRenderer;
+                animatedRenderer = null;
+                visualTransform = null;
+                clonedRenderer = false;
+            }
             if (!sourceRenderer) sourceRenderer = GetComponentInChildren<SpriteRenderer>();
-            if (!sourceRenderer) return;
+            if (!sourceRenderer) return false;
 
             if (sourceRenderer.transform == transform)
             {
-                var existingVisual = transform.Find("PlayerAnimatedVisual");
-                var visual = existingVisual ? existingVisual.gameObject : new GameObject("PlayerAnimatedVisual");
-                visual.transform.SetParent(transform, false);
-                animatedRenderer = visual.GetComponent<SpriteRenderer>() ?? visual.AddComponent<SpriteRenderer>();
+                var visual = transform.Find("PlayerAnimatedVisual");
+                var visualObject = visual ? visual.gameObject : new GameObject("PlayerAnimatedVisual");
+                if (!visual) visualObject.transform.SetParent(transform, false);
+                animatedRenderer = visualObject.GetComponent<SpriteRenderer>();
+                if (!animatedRenderer) animatedRenderer = visualObject.AddComponent<SpriteRenderer>();
                 animatedRenderer.sharedMaterial = sourceRenderer.sharedMaterial;
                 animatedRenderer.sortingLayerID = sourceRenderer.sortingLayerID;
                 animatedRenderer.sortingOrder = sourceRenderer.sortingOrder;
@@ -354,11 +403,21 @@ namespace ProjectLike.Phase1
             baseScale = visualTransform.localScale;
             basePosition = visualTransform.localPosition;
             baseColor = animatedRenderer.color;
+            return true;
         }
 
         void Update()
         {
-            if (!animatedRenderer || !visualTransform || dying) return;
+            var playerRenderer = GetComponent<SpriteRenderer>();
+            if (playerRenderer && sourceRenderer != playerRenderer)
+            {
+                sourceRenderer = playerRenderer;
+                animatedRenderer = null;
+                visualTransform = null;
+                clonedRenderer = false;
+            }
+            if ((!animatedRenderer || !visualTransform) && !EnsureVisualReady()) return;
+            if (dying) return;
             if (clonedRenderer)
             {
                 animatedRenderer.sprite = sourceRenderer.sprite;

@@ -40,10 +40,11 @@ namespace ProjectLike.Phase3
             homing = false; collected = false;
             core.enabled = true; glow.enabled = true;
             var color = type == MobDropType.Coin ? new Color(1f, .72f, .08f) : type == MobDropType.Energy ? new Color(.08f, .65f, 1f) : new Color(1f, .08f, .18f);
-            core.color = color; glow.color = new Color(color.r, color.g, color.b, .32f);
+            core.color = new Color(color.r * 1.45f, color.g * 1.45f, color.b * 1.45f, color.a);
+            glow.color = SoftGlowSprite.Tint(color, .56f, 2.8f);
             core.transform.localScale = type == MobDropType.Coin ? new Vector3(.2f, .2f, 1) : type == MobDropType.Energy ? new Vector3(.17f, .25f, 1) : new Vector3(.24f, .2f, 1);
             trail.startColor = color; trail.endColor = new Color(color.r, color.g, color.b, 0);
-            var particlesMain = collectParticles.main; particlesMain.startColor = color;
+            var particlesMain = collectParticles.main; particlesMain.startColor = new Color(color.r * 2.2f, color.g * 2.2f, color.b * 2.2f, color.a);
             trail.Clear(); trail.emitting = false;
             collectParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
@@ -94,7 +95,7 @@ namespace ProjectLike.Phase3
             core = GetComponent<SpriteRenderer>(); if (!core) core = gameObject.AddComponent<SpriteRenderer>();
             core.sprite = CombatFeedback.WhiteSprite; core.sortingOrder = 30;
             var glowObject = new GameObject("Glow"); glowObject.transform.SetParent(transform, false);
-            glow = glowObject.AddComponent<SpriteRenderer>(); glow.sprite = CombatFeedback.WhiteSprite; glow.sortingOrder = 29;
+            glow = glowObject.AddComponent<SpriteRenderer>(); glow.sprite = SoftGlowSprite.Sprite; glow.sharedMaterial = SoftGlowSprite.Material; glow.sortingOrder = 29;
             trail = gameObject.AddComponent<TrailRenderer>(); trail.material = sharedMaterial; trail.time = .22f; trail.startWidth = .13f; trail.endWidth = 0; trail.minVertexDistance = .035f; trail.sortingOrder = 28; trail.emitting = false;
             collectParticles = gameObject.AddComponent<ParticleSystem>();
             // Al añadirlo Unity comienza a reproducirlo automáticamente. Hay que

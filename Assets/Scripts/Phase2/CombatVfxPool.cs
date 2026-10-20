@@ -14,6 +14,7 @@ namespace ProjectLike.Phase2
         readonly Queue<PooledDamageNumber> numbers = new Queue<PooledDamageNumber>();
         Sprite ringSprite;
         Sprite slashArcSprite;
+        CombatEffectCatalog effectCatalog;
 
         public static CombatVfxPool Instance
         {
@@ -58,29 +59,13 @@ namespace ProjectLike.Phase2
             var angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             var color = CombatFeedback.GetImpactColor(weapon, ImpactSurface.Metal);
             var mirror = comboIndex % 2 == 0 ? 1f : -1f;
-            var scale = Mathf.Max(.82f, .72f + weapon.range * .34f);
-            var position = origin + direction * Mathf.Max(.12f, weapon.range * .16f);
+            var scale = Mathf.Clamp(.76f + weapon.range * .1f, .82f, 1.05f);
+            // Keep the melee slash near the weapon hand. Weapon range controls hits, not VFX placement.
+            var position = origin + direction * .28f;
             var duration = Mathf.Clamp(weapon.attackDuration * 1.18f, .15f, .28f);
 
-            var outerArc = GetVisual();
-            outerArc.Play(SlashArcSprite, position, new Color(color.r, color.g, color.b, .78f), Vector2.zero,
-                new Vector3(scale, scale * mirror, 1f), duration, angle,
-                new Vector3(.16f, .16f * mirror, 0f), mirror * 52f, 30);
-
-            var innerArc = GetVisual();
-            innerArc.Play(SlashArcSprite, position + direction * .035f, Color.Lerp(color, Color.white, .82f), Vector2.zero,
-                new Vector3(scale * .86f, scale * .86f * mirror, 1f), duration * .72f, angle,
-                new Vector3(.08f, .08f * mirror, 0f), mirror * 68f, 31);
-
-            var tip = origin + direction * Mathf.Max(.65f, weapon.range * .92f);
-            for (var i = 0; i < 4; i++)
-            {
-                var sparkAngle = angle + Random.Range(-34f, 34f);
-                var sparkDirection = (Vector2)(Quaternion.Euler(0f, 0f, sparkAngle) * Vector2.right);
-                GetVisual().Play(CombatFeedback.WhiteSprite, tip + Random.insideUnitCircle * .035f, Color.Lerp(color, Color.white, .55f),
-                    sparkDirection * Random.Range(.8f, 1.8f), new Vector3(Random.Range(.035f, .065f), .018f, 1f),
-                    Random.Range(.08f, .15f), sparkAngle, Vector3.one * .018f, Random.Range(-480f, 480f), 32);
-            }
+            PlayEffect("slash_v3", position, direction, new Vector3(scale, scale * mirror, 1f),
+                duration, false, color, 31);
         }
 
         public void SpawnEnemyAttack(Vector2 origin, Vector2 direction, EnemyAttackStyle style, Color color, float strength = 1f)
@@ -156,6 +141,13 @@ namespace ProjectLike.Phase2
                 case WeaponSpecialEffectType.LifeSteal: color = new Color(1f, .1f, .3f); break;
             }
             var wave = effect == WeaponSpecialEffectType.Wave || effect == WeaponSpecialEffectType.ProjectileBreak || effect == WeaponSpecialEffectType.Gravity || effect == WeaponSpecialEffectType.Nova;
+            var spriteEffect = effect == WeaponSpecialEffectType.Fire ? "fire_slash" :
+                effect == WeaponSpecialEffectType.Shock ? "impact_lightning 1 _B" :
+                effect == WeaponSpecialEffectType.Nova ? "impact_fireclouds_med" :
+                effect == WeaponSpecialEffectType.Bleed ? "Bleed_large" : null;
+            if (!string.IsNullOrEmpty(spriteEffect))
+                PlayEffect(spriteEffect, origin, Vector2.up, Vector3.one * (effect == WeaponSpecialEffectType.Fire ? .6f : .48f),
+                    effect == WeaponSpecialEffectType.Bleed ? .34f : .28f, false, Color.white, 33);
             // Ring diameter matches the two-unit damage radius (2.2 for projectile clearing).
             var diameter = wave ? (effect == WeaponSpecialEffectType.ProjectileBreak ? 4.9f : 4.45f) : .95f;
             GetVisual().Play(RingSprite, origin, new Color(color.r, color.g, color.b, .62f), Vector2.zero,
@@ -178,6 +170,9 @@ namespace ProjectLike.Phase2
             var delta = to - from;
             var normal = new Vector2(-delta.y, delta.x).normalized;
             var previous = from;
+            var fullAngle = Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg;
+            PlayEffect("lightning_bolt__B", (from + to) * .5f, Quaternion.Euler(0, 0, fullAngle) * Vector2.right,
+                new Vector3(Mathf.Max(.4f, delta.magnitude / 1.5f), .35f, 1f), .22f, false, Color.white, 34);
             const int segments = 6;
             for (var i = 1; i <= segments; i++)
             {
@@ -200,6 +195,32 @@ namespace ProjectLike.Phase2
                     Color.Lerp(color, burning ? Color.yellow : Color.white, Random.Range(0f, .4f)),
                     new Vector2(Random.Range(-.12f, .12f), burning ? .9f : .45f),
                     new Vector3(.035f, burning ? .14f : .06f, 1f), .38f, Random.Range(-20f, 20f), Vector3.zero, 0f, 32);
+        }
+
+        public void SpawnStatusSprite(Vector2 origin, string effectName, Color color)
+        {
+            var scale = effectName == "Fire_Incinerate" ? .48f : .42f;
+            PlayEffect(effectName, origin, Vector2.up, Vector3.one * scale, .34f, false, Color.white, 29);
+        }
+
+        void PlayEffect(string assetName, Vector2 position, Vector2 direction, Vector3 scale, float duration, bool loop, Color color, int order)
+        {
+            var frames = EffectCatalog ? EffectCatalog.Get(assetName) : null;
+            if (frames == null || frames.Length == 0) return;
+            var visual = GetVisual();
+            var useGlow = !assetName.ToLowerInvariant().Contains("slash");
+            visual.PlayAnimation(frames, position, color, Vector2.zero, scale, duration, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg, order, loop, useGlow);
+        }
+
+        public static Sprite[] LoadEffectFrames(string assetName)
+        {
+            var catalog = Resources.Load<CombatEffectCatalog>("CombatEffectCatalog");
+            return catalog ? catalog.Get(assetName) : System.Array.Empty<Sprite>();
+        }
+
+        CombatEffectCatalog EffectCatalog
+        {
+            get { if (!effectCatalog) effectCatalog = Resources.Load<CombatEffectCatalog>("CombatEffectCatalog"); return effectCatalog; }
         }
 
         void SpawnColoredSpark(Vector2 origin, Vector2 direction, Color color, float minimumSpeed, float maximumSpeed)
@@ -287,8 +308,18 @@ namespace ProjectLike.Phase2
             if (camera) camera.Shake(Mathf.Clamp(.16f + damage / 45f, .18f, .38f));
         }
 
-        public void SpawnEnemyProjectileImpact(Vector2 position, Vector2 direction)
+        public void SpawnEnemyProjectileImpact(Vector2 position, Vector2 direction, EnemyAttackStyle style)
         {
+            if (style == EnemyAttackStyle.FireFan)
+            {
+                PlayEffect("impact_fireclouds_med", position, Vector2.up, Vector3.one * .48f, .28f, false, Color.white, 34);
+                return;
+            }
+            if (style == EnemyAttackStyle.ArcaneBurst)
+            {
+                PlayEffect("impact_lightning 1 _B", position, direction, Vector3.one * .42f, .24f, false, Color.white, 34);
+                return;
+            }
             var color = new Color(1f, .2f, .04f);
             var flash = GetVisual();
             flash.Play(CombatFeedback.WhiteSprite, position, new Color(1f, .82f, .28f), Vector2.zero,
@@ -382,29 +413,66 @@ namespace ProjectLike.Phase2
     {
         internal CombatVfxPool pool;
         SpriteRenderer renderer;
+        SpriteRenderer glowRenderer;
         float duration, elapsed, spin;
         Vector3 velocity, initialScale, scaleGrowth;
         Color initialColor;
+        Sprite[] animationFrames;
+        float frameDuration;
+        bool loopAnimation;
 
-        void Awake() { renderer = gameObject.AddComponent<SpriteRenderer>(); renderer.sortingOrder = 31; }
+        void Awake()
+        {
+            renderer = gameObject.AddComponent<SpriteRenderer>(); renderer.sortingOrder = 31;
+            var glowObject = new GameObject("SoftLight"); glowObject.transform.SetParent(transform, false);
+            glowObject.transform.localScale = Vector3.one * 4.2f;
+            glowRenderer = glowObject.AddComponent<SpriteRenderer>();
+            glowRenderer.sprite = SoftGlowSprite.Sprite; glowRenderer.sharedMaterial = SoftGlowSprite.Material;
+            glowRenderer.sortingOrder = 30;
+        }
         public void Play(Sprite sprite, Vector2 position, Color color, Vector2 movement, Vector3 scale, float life, float angle, Vector3 growth, float rotationSpeed, int order)
         {
+            animationFrames = null;
+            var useGlow = !sprite || !sprite.name.ToLowerInvariant().Contains("slash");
             transform.position = position; transform.rotation = Quaternion.Euler(0, 0, angle); transform.localScale = scale;
-            renderer.sprite = sprite; renderer.color = color; renderer.sortingOrder = order;
+            renderer.sprite = sprite; renderer.color = useGlow ? BloomColor(color) : color; renderer.sortingOrder = order;
+            glowRenderer.enabled = useGlow;
+            glowRenderer.sortingOrder = order - 1; glowRenderer.color = SoftGlowSprite.Tint(color, .44f);
             velocity = movement; initialScale = scale; scaleGrowth = growth; initialColor = color; duration = life; elapsed = 0; spin = rotationSpeed;
+        }
+        public void PlayAnimation(Sprite[] frames, Vector2 position, Color color, Vector2 movement, Vector3 scale, float life, float angle, int order, bool loop, bool useGlow = true)
+        {
+            if (frames == null || frames.Length == 0) return;
+            animationFrames = frames; loopAnimation = loop; frameDuration = life / frames.Length;
+            transform.position = position; transform.rotation = Quaternion.Euler(0, 0, angle); transform.localScale = scale;
+            renderer.sprite = frames[0]; renderer.color = useGlow ? BloomColor(color) : color; renderer.sortingOrder = order;
+            glowRenderer.enabled = useGlow;
+            glowRenderer.sortingOrder = order - 1; glowRenderer.color = SoftGlowSprite.Tint(color, .44f);
+            velocity = movement; initialScale = scale; scaleGrowth = Vector3.zero; initialColor = color; duration = life; elapsed = 0; spin = 0;
         }
         void Update()
         {
             elapsed += Time.unscaledDeltaTime;
             var t = Mathf.Clamp01(elapsed / Mathf.Max(.001f, duration));
+            if (animationFrames != null)
+            {
+                var frame = Mathf.FloorToInt(elapsed / Mathf.Max(.001f, frameDuration));
+                if (loopAnimation) frame %= animationFrames.Length;
+                else frame = Mathf.Min(frame, animationFrames.Length - 1);
+                renderer.sprite = animationFrames[frame];
+            }
             var eased = 1f - Mathf.Pow(1f - t, 3f);
             transform.position += velocity * Time.unscaledDeltaTime;
             transform.localScale = initialScale + scaleGrowth * eased;
             transform.Rotate(0, 0, spin * Time.unscaledDeltaTime);
-            var fade = 1f - Mathf.SmoothStep(.18f, 1f, t);
-            renderer.color = new Color(initialColor.r, initialColor.g, initialColor.b, initialColor.a * fade);
+            var fade = animationFrames != null && loopAnimation ? 1f : 1f - Mathf.SmoothStep(.18f, 1f, t);
+            var frameColor = new Color(initialColor.r, initialColor.g, initialColor.b, initialColor.a * fade);
+            renderer.color = glowRenderer.enabled ? BloomColor(frameColor) : frameColor;
+            var glowColor = glowRenderer.color; glowColor.a = Mathf.Clamp01(initialColor.a * .44f * fade); glowRenderer.color = glowColor;
             if (t >= 1) pool.Return(this);
         }
+
+        static Color BloomColor(Color color) => new Color(color.r * 1.55f, color.g * 1.55f, color.b * 1.55f, color.a);
     }
 
     public class PooledDamageNumber : MonoBehaviour

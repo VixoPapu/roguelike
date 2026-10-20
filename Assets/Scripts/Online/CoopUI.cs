@@ -302,7 +302,7 @@ namespace ProjectLike.Online
             var rect=Rect(title,parent,Vector2.one*.5f,position,size);Frame(rect);var button=rect.gameObject.AddComponent<Button>();button.targetGraphic=rect.GetComponent<Image>();
             var colors=button.colors;colors.highlightedColor=new Color(.8f,.55f,1f);colors.selectedColor=colors.highlightedColor;button.colors=colors;
             Label(rect,title,Vector2.one*.5f,Vector2.zero,size-new Vector2(12,4),14);
-            button.onClick.AddListener(()=>{GameSfx.Play(SfxCue.UiConfirm,Vector2.zero,.5f,true);action();});return button;
+            button.onClick.AddListener(action);return button;
         }
     }
 }

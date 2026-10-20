@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using ProjectLike.Phase1;
 using ProjectLike.Phase2;
+using ProjectLike.Phase3;
 using ProjectLike.Phase5;
 using ProjectLike.Phase6;
 using ProjectLike.Phase10;
@@ -203,7 +204,7 @@ namespace ProjectLike.Online
             foreach (var member in members.Values) if (member.actor) member.actor.controls.ClearEdges();
         }
         // Host UI keeps its own menu reference; the shared render array is immutable this frame.
-        static CoopWorld CopyView(CoopWorld world) => new CoopWorld { seed = world.seed, world = world.world, level = world.level, players = world.players, rooms = world.rooms, menu = world.menu, gameOver = world.gameOver, timeStopped = world.timeStopped };
+        static CoopWorld CopyView(CoopWorld world) => new CoopWorld { seed = world.seed, world = world.world, level = world.level, players = world.players, rooms = world.rooms, menu = world.menu, gameOver = world.gameOver, timeStopped = world.timeStopped, bossActive = world.bossActive, bossName = world.bossName, bossPhase = world.bossPhase, bossMusic = world.bossMusic, bossHealth = world.bossHealth, bossMaxHealth = world.bossMaxHealth, bossMusicVolume = world.bossMusicVolume, cameraTrauma = world.cameraTrauma, bossCinematicPhase = world.bossCinematicPhase, bossCinematicProgress = world.bossCinematicProgress, bossPosition = world.bossPosition, bossCameraPosition = world.bossCameraPosition, bossCameraSize = world.bossCameraSize, bossCameraRoll = world.bossCameraRoll };
         void HandlePeer(Peer peer, CoopMessage message)
         {
             if (message == null) throw new InvalidOperationException("Mensaje vacio");
@@ -220,7 +221,7 @@ namespace ProjectLike.Online
                 var value = message.input;
                 if (!Finite(value.move) || !Finite(value.aim)) throw new InvalidOperationException("Entrada invalida");
                 value.move = Vector2.ClampMagnitude(value.move, 1f); value.aim = value.aim.sqrMagnitude > .001f ? value.aim.normalized : Vector2.right;
-                value.pressed &= 127; value.held &= 127; value.released &= 127;
+                value.pressed &= 255; value.held &= 255; value.released &= 255;
                 member.actor.controls.Merge(value);
                 peer.lastInput = Time.unscaledTime;
             }
@@ -281,6 +282,7 @@ namespace ProjectLike.Online
 #endif
             }
             PlaceParty(true); IgnorePartyCollisions();
+            ProjectLike.Phase1.LevelIntroOverlay.Show(generator.CurrentWorld, generator.CurrentLevel);
             foreach (var member in members.Values) AddNameplate(member);
             playing = true; Busy = false; Time.timeScale = 1f;
             Broadcast(new CoopMessage { kind = "start" });
@@ -426,9 +428,10 @@ namespace ProjectLike.Online
             if (!portal || members.Values.Any(m => !m.selected)) return;
             portal = false; Time.timeScale = 1f;
             var generator = FindAnyObjectByType<DungeonGenerator>();
-            bool reset = generator.CurrentWorld == 5 && generator.CurrentLevel == 5;
+            bool reset = generator.CurrentWorld == DungeonGenerator.MaximumWorld && generator.CurrentLevel == DungeonGenerator.LevelsPerWorld;
             generator.AdvanceRun(members[1].actor.GetComponent<PlayerController>());
             PlaceParty(reset);
+            ProjectLike.Phase1.LevelIntroOverlay.Show(generator.CurrentWorld, generator.CurrentLevel);
             foreach (var member in members.Values) { member.rewards = null; member.actor.menuOpen = false; member.message = ""; }
         }
         void PlaceParty(bool reset)
@@ -468,7 +471,9 @@ namespace ProjectLike.Online
             if (command == "restart" && gameOver && id == 1)
             {
                 foreach (var entry in members.Values) { entry.shop = null; entry.rewards = null; entry.actor.menuOpen = false; }
-                FindAnyObjectByType<DungeonGenerator>().RestartRun(members[1].actor.GetComponent<PlayerController>());
+                var generator = FindAnyObjectByType<DungeonGenerator>();
+                generator.RestartRun(members[1].actor.GetComponent<PlayerController>());
+                ProjectLike.Phase1.LevelIntroOverlay.Show(generator.CurrentWorld, generator.CurrentLevel);
                 PlaceParty(true); gameOver = false; Time.timeScale = 1f; return;
             }
             if (member.revision != expectedRevision) return;
@@ -481,11 +486,9 @@ namespace ProjectLike.Online
             if (!member.shop || portal) return;
             if (command == "close") { member.shop = null; member.actor.menuOpen = false; return; }
             var shop = member.shop; shop.SelectCustomer(member.actor.gameObject);
-            bool success;
-            if (command == "buy") success = shop.TryPurchase(index, member.actor.gameObject, out member.message);
-            else if (command == "reroll") success = shop.TryReroll(member.actor.GetComponent<PlayerStats>(), out member.message);
+            if (command == "buy") shop.TryPurchase(index, member.actor.gameObject, out member.message);
+            else if (command == "reroll") shop.TryReroll(member.actor.GetComponent<PlayerStats>(), out member.message);
             else return;
-            PersonalSound(id, success ? command == "buy" ? SfxCue.ShopBuy : SfxCue.UiConfirm : SfxCue.UiDeny);
             member.revision = ++revision;
             if (shop.IsLockedFor(member.actor.gameObject)) { member.shop = null; member.actor.menuOpen = false; }
         }
@@ -506,14 +509,24 @@ namespace ProjectLike.Online
         CoopWorld CaptureWorld()
         {
             var generator = FindAnyObjectByType<DungeonGenerator>();
+            var boss = FindObjectsByType<KharosBossAI>().FirstOrDefault(candidate => candidate && candidate.ShouldReplicateEncounter);
+            var cameraFollow = Camera.main ? Camera.main.GetComponent<CameraFollow>() : null;
             return new CoopWorld { seed = generator.CurrentSeed, world = generator.CurrentWorld, level = generator.CurrentLevel, gameOver = gameOver, timeStopped = TimeStopAbility.IsActive,
+                bossActive = boss && boss.ShouldReplicateBossHud, bossName = boss ? boss.ReplicatedBossName : "", bossPhase = boss ? boss.ReplicatedBossPhase : "",
+                bossHealth = boss ? boss.ReplicatedHealth : 0f, bossMaxHealth = boss ? boss.ReplicatedMaxHealth : 0f,
+                bossMusic = boss ? boss.ReplicatedMusicName : "", bossMusicVolume = boss ? boss.ReplicatedMusicVolume : 0f,
+                bossCinematicPhase = boss ? boss.ReplicatedCinematicPhase : 0, bossCinematicProgress = boss ? boss.ReplicatedCinematicProgress : 0f, bossPosition = boss ? boss.transform.position : Vector3.zero,
+                bossCameraPosition = boss ? boss.ReplicatedCinematicCameraPosition : Vector3.zero,
+                bossCameraSize = boss ? boss.ReplicatedCinematicCameraSize : 0f, bossCameraRoll = boss ? boss.ReplicatedCinematicCameraRoll : 0f,
+                cameraTrauma = cameraFollow ? cameraFollow.trauma : 0f,
                 background = Camera.main ? Camera.main.backgroundColor : Color.black,
                 flashColor = FindObjectsByType<UnityEngine.UI.Image>().Where(i => i.name == "Flash" && i.GetComponentInParent<TimeStopAbility>()).Select(i => i.color).OrderByDescending(c => c.a).FirstOrDefault(),
                 players = members.Values.Where(m => m.actor).Select(m =>
                 {
                     var s = m.actor.GetComponent<PlayerStats>(); var w = m.actor.GetComponent<WeaponController>(); var c = m.actor.GetComponent<PlayerConsumables>(); var t = m.actor.GetComponent<TimeStopAbility>(); var powers = m.actor.GetComponent<PlayerPowerUps>();
                     var ally = m.actor.GetComponent<CoopAllyStatus>();
-                    return new CoopActor { id = m.id, name = m.name, position = m.actor.transform.position, health = s.CurrentHealth, maxHealth = s.maxHealth, shield = s.CurrentShield, maxShield = s.maxShield, energy = s.CurrentEnergy, maxEnergy = s.maxEnergy, coins = s.coins, downed = ally && ally.Downed, reviveProgress = ally ? ally.ReviveProgress : 0f, reviving = ally && ally.ReviveProgress > 0f,
+                    var qte = m.actor.GetComponent<KharosRootQte>();
+                    return new CoopActor { id = m.id, name = m.name, position = m.actor.transform.position, health = s.CurrentHealth, maxHealth = s.maxHealth, shield = s.CurrentShield, maxShield = s.maxShield, energy = s.CurrentEnergy, maxEnergy = s.maxEnergy, coins = s.coins, downed = ally && ally.Downed, reviveProgress = ally ? ally.ReviveProgress : 0f, reviving = ally && ally.ReviveProgress > 0f, rootQte = qte && qte.IsActive, qtePresses = qte ? qte.Presses : 0,
                         primary = w && w.PrimaryWeapon ? w.PrimaryWeapon.weaponName : "-", secondary = w && w.SecondaryWeapon ? w.SecondaryWeapon.weaponName : "-", slot = w ? w.ActiveSlot : 1,
                         consumable = c && c.Current ? c.Current.displayName + " x" + c.Count : "Sin consumibles", ability = t ? t.Remaining > 0 ? "Tiempo cero " + t.Remaining.ToString("0.0") : t.CooldownRemaining > 0 ? "Recarga " + t.CooldownRemaining.ToString("0") + "s" : "[F] Tiempo cero" : "", notice = m.message, comparison = Comparison(m.actor.gameObject, w ? w.EquippedWeapon : null), powers = powers ? powers.acquired.Where(p => p).Select(p => p.effectId).ToArray() : Array.Empty<string>() };
                 }).ToArray(),

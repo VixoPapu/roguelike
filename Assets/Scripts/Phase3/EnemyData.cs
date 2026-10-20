@@ -7,6 +7,8 @@ namespace ProjectLike.Phase3
     public class EnemyData : ScriptableObject
     {
         [Header("Identity")] public string enemyName = "Enemy"; [TextArea] public string description; public Sprite sprite; public Sprite[] animationFrames; [Min(1)] public float animationFramesPerSecond = 7; public RuntimeAnimatorController animations; public EnemyBehaviour[] behaviours;
+        [Tooltip("Uses the bespoke Kharos boss behavior and movement.")] public bool kharosBoss;
+        [Tooltip("Optional looping music used during this boss encounter.")] public AudioClip bossMusic;
         [Header("Stats")] public float maxHealth = 35; public float damage = 3; public float moveSpeed = 2.5f; public float defense; [Range(0, 1)] public float resistance; public float knockbackResistance;
         [Header("Awareness / attack")] public float detectionRange = 7; public float attackRange = 1.1f; public float preferredRange = 4; public float attackCooldown = 1; public float recoveryTime = .25f;
         [Header("Abilities")] public EnemyAttackStyle attackStyle = EnemyAttackStyle.Basic; public Color effectColor = new Color(1f, .25f, .08f); public float projectileSpeed = 7; public int projectileCount = 1; public float chargeTelegraph = .55f; public float chargeSpeed = 9; public float chargeDistance = 5; public float teleportCooldown = 4; public float summonCooldown = 6; public EnemyData summonData;

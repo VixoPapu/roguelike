@@ -53,24 +53,39 @@ namespace ProjectLike.Phase1
     {
         internal DashVfxPool pool;
         SpriteRenderer renderer;
+        SpriteRenderer glowRenderer;
         Color initialColor;
         Vector3 velocity;
         float elapsed;
         bool persistent;
-        const float Duration = .22f;
+        float glowOpacity;
+        const float Duration = .32f;
 
-        void Awake() { renderer = gameObject.AddComponent<SpriteRenderer>(); }
+        void Awake()
+        {
+            renderer = gameObject.AddComponent<SpriteRenderer>();
+            var glowObject = new GameObject("SoftDashLight"); glowObject.transform.SetParent(transform, false);
+            glowObject.transform.localScale = Vector3.one * 1.65f;
+            glowRenderer = glowObject.AddComponent<SpriteRenderer>();
+            glowRenderer.sprite = SoftGlowSprite.Sprite; glowRenderer.sharedMaterial = SoftGlowSprite.Material;
+        }
         public void Play(SpriteRenderer source, Vector2 direction, Color tint, bool holdUntilTimeResumes)
         {
             persistent = holdUntilTimeResumes;
             renderer.sortingLayerID = source.sortingLayerID;
+            glowRenderer.sortingLayerID = source.sortingLayerID;
+            glowRenderer.sortingOrder = source.sortingOrder - 2;
             renderer.flipY = source.flipY;
             renderer.sprite = source.sprite; renderer.flipX = source.flipX; renderer.sortingOrder = source.sortingOrder - 1;
-            initialColor = new Color(tint.r, tint.g, tint.b, persistent ? .6f : .48f);
+            var bodyIntensity = persistent ? 1.05f : 1.15f;
+            initialColor = new Color(tint.r * bodyIntensity, tint.g * bodyIntensity, tint.b * bodyIntensity, persistent ? .26f : .38f);
             renderer.color = initialColor;
-            transform.position = source.transform.position - (Vector3)direction * .04f;
+            glowOpacity = persistent ? .065f : .16f;
+            glowRenderer.enabled = true;
+            glowRenderer.color = SoftGlowSprite.Tint(tint, glowOpacity, 1.45f);
+            transform.position = source.transform.position - (Vector3)direction * .16f;
             transform.rotation = source.transform.rotation; transform.localScale = source.transform.lossyScale;
-            velocity = -(Vector3)direction * Random.Range(.2f, .55f);
+            velocity = -(Vector3)direction * Random.Range(.45f, .8f);
             elapsed = 0;
         }
         void Update()
@@ -81,6 +96,7 @@ namespace ProjectLike.Phase1
             transform.position += velocity * Time.unscaledDeltaTime;
             transform.localScale *= 1 + Time.unscaledDeltaTime * .65f;
             renderer.color = new Color(initialColor.r, initialColor.g, initialColor.b, initialColor.a * (1 - t));
+            var glow = glowRenderer.color; glow.a = Mathf.Clamp01(glowOpacity * (1f - t)); glowRenderer.color = glow;
             if (t >= 1) pool.Return(this);
         }
     }

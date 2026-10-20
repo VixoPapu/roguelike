@@ -42,6 +42,9 @@ namespace ProjectLike.Phase3
         void LateUpdate()
         {
             if (!brain || !brain.data || !fillTransform) return;
+            var barRoot = fillTransform.parent;
+            var localHeight = brain.data.sprite ? brain.data.sprite.bounds.extents.y + .15f : .72f;
+            if (barRoot) barRoot.localPosition = new Vector3(0f, Mathf.Max(.72f, localHeight), 0f);
             var target = brain.RuntimeMaxHealth > 0f ? Mathf.Clamp01(brain.CurrentHealth / brain.RuntimeMaxHealth) : 0f;
             displayedRatio = Mathf.MoveTowards(displayedRatio, target, Time.deltaTime * 3.5f);
             fillTransform.localScale = new Vector3(InnerWidth * displayedRatio, .075f, 1f);

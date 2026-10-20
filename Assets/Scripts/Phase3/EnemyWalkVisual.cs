@@ -14,6 +14,7 @@ namespace ProjectLike.Phase3
         [Range(0f, .25f)] public float horizontalStretch = .055f;
         [Range(0f, 15f)] public float walkTilt = 5f;
         [Range(0f, .2f)] public float walkBob = .045f;
+        [Min(.1f)] public float visualScaleMultiplier = 1f;
 
         EnemyBrain brain;
         SpriteRenderer sourceRenderer;
@@ -60,7 +61,7 @@ namespace ProjectLike.Phase3
             if (clonedRenderer) SyncRenderer();
 
             var movement = brain.MovementIntensity;
-            var targetScale = baseScale;
+            var targetScale = baseScale * visualScaleMultiplier;
             var targetPosition = basePosition;
             var targetRotation = 0f;
 

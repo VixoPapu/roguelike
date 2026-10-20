@@ -43,6 +43,7 @@ namespace ProjectLike.Phase6
         {
             if (!generator || !player) return;
             generator.AdvanceRun(player.GetComponent<PlayerController>());
+            LevelIntroOverlay.Show(generator.CurrentWorld, generator.CurrentLevel);
             var body = player.GetComponent<Rigidbody2D>();
             if (body)
             {

@@ -12,6 +12,9 @@ namespace ProjectLike.Phase6
         public RoomType roomType;
         public RoomVisualVariant visualVariant;
         public bool mainPath;
+        public Vector2 worldPosition;
+        public Vector2 customRoomSize;
+        public bool hasCustomGeometry;
         public List<RoomDirection> connections = new List<RoomDirection>();
     }
 

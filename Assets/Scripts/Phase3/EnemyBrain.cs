@@ -18,7 +18,10 @@ namespace ProjectLike.Phase3
         public float CurrentShield { get; private set; }
         public RoomController OwningRoom { get; private set; }
         public bool IsDead => dead;
+        public bool BossDefeatCinematicPending => dead && data && data.kharosBoss && !isKharosClone && !bossDefeatCinematicComplete;
+        public bool IsKharosClone => isKharosClone;
         public float RuntimeMaxHealth => runtimeMaxHealth;
+        public float EffectiveDamage => data ? data.damage * damageScale : 0f;
         public bool IsMoving => !dead && (charging || movement.sqrMagnitude > .01f);
         public float MovementIntensity => dead ? 0f : charging ? 1f : Mathf.Clamp01(movement.magnitude);
         public float ExternalSpeedMultiplier { get; set; } = 1f;
@@ -26,7 +29,8 @@ namespace ProjectLike.Phase3
 
         Rigidbody2D body; SpriteRenderer spriteRenderer; Animator animator; AudioSource audioSource; Transform player;
         Vector2 movement, chargeDirection, knockbackVelocity; float nextAttack, recoveryUntil, stunUntil, nextTeleport, nextSummon, nextSupport, chargeUntil, telegraphUntil, nextBossPattern, nextStrafeSwap;
-        bool charging, telegraphing, chargeHitPlayer, dead;
+        bool charging, telegraphing, chargeHitPlayer, dead, isKharosClone;
+        bool bossDefeatCinematicComplete;
         float healthScale = 1f, damageScale = 1f, moveScale = 1f, cooldownScale = 1f, runtimeMaxHealth;
         int patternBonus;
         GameObject lastAttacker;
@@ -45,8 +49,6 @@ namespace ProjectLike.Phase3
             strafeSign = UnityEngine.Random.value < .5f ? -1 : 1;
             nextStrafeSwap = Time.time + UnityEngine.Random.Range(1.2f, 2.4f);
             ApplyData();
-            if (!GetComponent<EnemyWalkVisual>()) gameObject.AddComponent<EnemyWalkVisual>();
-            if (!GetComponent<EnemyHealthBar>()) gameObject.AddComponent<EnemyHealthBar>();
         }
         // Los enemigos creados desde spawners asignan el ScriptableObject justo
         // después de AddComponent; esta segunda inicialización evita que nazcan
@@ -54,6 +56,11 @@ namespace ProjectLike.Phase3
         void Start()
         {
             if (data && CurrentHealth <= 0) ApplyData();
+            if (!GetComponent<EnemyWalkVisual>()) gameObject.AddComponent<EnemyWalkVisual>();
+            // Kharos has a dedicated screen-space boss bar; avoid building and
+            // immediately hiding a second world-space bar during his spawn.
+            if ((!data || !data.kharosBoss) && !GetComponent<EnemyHealthBar>())
+                gameObject.AddComponent<EnemyHealthBar>();
         }
         public void Configure(EnemyData template, RoomController room = null, float healthMultiplier = 1f, float damageMultiplier = 1f, float moveMultiplier = 1f, float cooldownMultiplier = 1f, int extraPatternProjectiles = 0)
         {
@@ -73,6 +80,14 @@ namespace ProjectLike.Phase3
             ApplyData();
         }
         public void AssignRoom(RoomController room) { if (!OwningRoom) OwningRoom = room; }
+        public void ConfigureKharosClone(float health, EnemyBrain owner)
+        {
+            isKharosClone = true;
+            runtimeMaxHealth = Mathf.Max(1f, health);
+            CurrentHealth = runtimeMaxHealth;
+            summoner = owner;
+            if (owner && !owner.ownedSummons.Contains(this)) owner.ownedSummons.Add(this);
+        }
         void ApplyData()
         {
             if (!data) return;
@@ -94,6 +109,8 @@ namespace ProjectLike.Phase3
             if (ProjectLike.Online.CoopSession.IsHost) player = ProjectLike.Online.CoopSession.Instance.NearestPlayer(transform.position);
             else if (!player) player = GameObject.FindWithTag("Player")?.transform ?? GameObject.Find("Player")?.transform;
             if (!player) return;
+            var kharos = GetComponent<KharosBossAI>();
+            if (kharos) { kharos.Tick(player); return; }
             var playerController = player.GetComponent<PlayerController>();
             if (playerController && playerController.IsInvisible) { SetState(EnemyState.Idle); movement = Vector2.zero; return; }
             var toPlayer = (Vector2)(player.position - transform.position); var distance = toPlayer.magnitude; var direction = distance > .01f ? toPlayer / distance : Vector2.right;
@@ -308,11 +325,13 @@ namespace ProjectLike.Phase3
         void SupportAllies() { foreach (var ally in Physics2D.OverlapCircleAll(transform.position, 4f)) { var brain = ally.GetComponent<EnemyBrain>(); if (!brain || brain == this) continue; brain.Heal(data.damage * .5f); brain.AddShield(data.damage * .25f); } EnemyVfx.Support(transform.position); }
         public void ReceiveHit(CombatHit hit)
         {
+            var kharos = GetComponent<KharosBossAI>();
+            if (kharos && (kharos.IsImmune || kharos.IsProtectedByHologram)) return;
             if (dead) return;
             if (hit.source && hit.source.GetComponentInParent<PlayerStats>()) lastAttacker = hit.source;
             var powerRuntime = hit.source ? hit.source.GetComponentInParent<PowerUpRuntime>() : null;
             if (powerRuntime) powerRuntime.ModifyOutgoingHit(ref hit, this);
-            if (dead) return; var rawDamage = (hit.damage <= 0f ? 0f : Mathf.Max(1, hit.damage - data.defense)) * (1 - data.resistance); var status=GetComponent<ElementalStatusEffects>();if(status)rawDamage*=status.DamageTakenMultiplier; var absorbed = Mathf.Min(CurrentShield, rawDamage); CurrentShield -= absorbed; rawDamage -= absorbed; CurrentHealth -= rawDamage;
+            if (dead) return; var rawDamage = (hit.damage <= 0f ? 0f : Mathf.Max(1, hit.damage - data.defense)) * (1 - data.resistance); var status=GetComponent<ElementalStatusEffects>();if(status)rawDamage*=status.DamageTakenMultiplier; if(isKharosClone)rawDamage*=1.6f; var absorbed = Mathf.Min(CurrentShield, rawDamage); CurrentShield -= absorbed; rawDamage -= absorbed; CurrentHealth -= rawDamage;
             ApplyKnockback(hit.direction, hit.knockback);
             CombatFeedback.ShowImpact(transform.position, new CombatHit { damage = rawDamage, direction = hit.direction, knockback = hit.knockback, critical = hit.critical, weapon = hit.weapon, source = hit.source }, ImpactSurface.Flesh);
             SetState(EnemyState.Damage); if (animator) animator.SetTrigger("Hit"); Play(data.hurtSound, SfxCue.EnemyHurt); if(powerRuntime)powerRuntime.AfterHit(this,hit,rawDamage); WeaponEffectRuntime.Apply(this, hit, rawDamage); if (CurrentHealth <= 0 && !dead) Die();
@@ -342,14 +361,23 @@ namespace ProjectLike.Phase3
             if (animator) animator.SetTrigger("Die");
             var elite = GetComponent<EliteEnemy>(); if (elite) elite.OnOwnerDeath();
             var killerRuntime=lastAttacker?lastAttacker.GetComponentInParent<PowerUpRuntime>():null;
-            if(killerRuntime)killerRuntime.OnEnemyKilled(this);
-            DropRewards();
+            if(!isKharosClone && killerRuntime)killerRuntime.OnEnemyKilled(this);
+            if(!isKharosClone) DropRewards();
             for (var i = ownedSummons.Count - 1; i >= 0; i--)
                 if (ownedSummons[i]) ownedSummons[i].DespawnWithSummoner();
             ownedSummons.Clear();
             if (summoner) summoner.ownedSummons.Remove(this);
+            var kharosFinale = data && data.kharosBoss && !isKharosClone;
+            if (OwningRoom && !isKharosClone && !kharosFinale) OwningRoom.NotifyEnemyDefeated(this);
+            Destroy(gameObject, kharosFinale ? 6f : .25f);
+        }
+
+        public void CompleteBossDefeatCinematic()
+        {
+            if (!BossDefeatCinematicPending) return;
+            bossDefeatCinematicComplete = true;
             if (OwningRoom) OwningRoom.NotifyEnemyDefeated(this);
-            Destroy(gameObject, .25f);
+            Destroy(gameObject, .3f);
         }
 
         void DespawnWithSummoner()
@@ -383,6 +411,8 @@ namespace ProjectLike.Phase3
             if (data.loot == null) return; foreach (var entry in data.loot) { if (!entry.prefab || UnityEngine.Random.value > entry.chance) continue; var count = UnityEngine.Random.Range(Mathf.Max(1, entry.minAmount), Mathf.Max(entry.minAmount + 1, entry.maxAmount + 1)); for (var i = 0; i < count; i++) Instantiate(entry.prefab, transform.position + (Vector3)UnityEngine.Random.insideUnitCircle * .25f, Quaternion.identity); }
         }
         void SetState(EnemyState value) { if (State == value) return; State = value; if (animator) animator.SetInteger("State", (int)value); }
+        public void SetCustomMovement(Vector2 value, EnemyState state) { movement = Vector2.ClampMagnitude(value, 1f); SetState(state); }
+        public void SetCustomFacing(Vector2 direction) { if (spriteRenderer && Mathf.Abs(direction.x) > .01f) spriteRenderer.flipX = direction.x < 0f; }
         void Play(AudioClip clip) { if (clip) { audioSource.PlayOneShot(clip); ProjectLike.Online.CoopSession.EmitSound(clip, transform.position, audioSource.volume, audioSource.pitch, audioSource.spatialBlend); } }
         void Play(AudioClip clip, SfxCue fallback) { if (clip) Play(clip); else GameSfx.Play(fallback, transform.position, fallback == SfxCue.EnemyHurt ? .5f : .72f); }
     }

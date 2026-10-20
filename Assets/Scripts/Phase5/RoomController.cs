@@ -18,6 +18,8 @@ namespace ProjectLike.Phase5
         public EnemyBrain[] sceneEnemies;
         [Tooltip("Objeto de recompensa ya presente en la sala, por ejemplo un cofre.")]
         public GameObject roomReward;
+        [Tooltip("Portal que se activa al limpiar una sala de jefe final.")]
+        public GameObject roomPortal;
         public bool disableSceneEnemiesUntilEntered = true;
         [Tooltip("Distancia que el centro del jugador debe cruzar dentro de la sala antes de cerrar puertas.")]
         [Min(.25f)] public float combatEntryInset = 1.15f;
@@ -160,6 +162,7 @@ namespace ProjectLike.Phase5
             State = RoomState.Cleared;
             GameSfx.Play(SfxCue.RoomClear, transform.position, .7f);
             SetDoorsLocked(false);
+            if (roomPortal) roomPortal.SetActive(true);
             SpawnReward();
             if (ProjectLike.Online.CoopSession.IsHost) ProjectLike.Online.CoopSession.Instance.PartyCompleted(this);
             else if(activePlayer){var powers=activePlayer.GetComponent<PowerUpRuntime>();if(powers)powers.OnRoomCompleted(this);}
@@ -181,6 +184,7 @@ namespace ProjectLike.Phase5
 
         void AddEnemy(EnemyBrain enemy)
         {
+            if (enemy && enemy.IsKharosClone) return;
             if (!enemy || enemies.Contains(enemy) || !roomBounds.bounds.Contains(enemy.transform.position)) return;
             enemies.Add(enemy);
             enemy.AssignRoom(this);
@@ -193,7 +197,7 @@ namespace ProjectLike.Phase5
             {
                 var enemy = enemies[i];
                 if (!enemy) { enemies.RemoveAt(i); continue; }
-                if (enemy.CurrentHealth > 0) count++;
+                if (enemy.CurrentHealth > 0 || enemy.BossDefeatCinematicPending) count++;
             }
             return count;
         }
@@ -257,6 +261,11 @@ namespace ProjectLike.Phase5
         {
             var positions = new List<Vector2>(count);
             var bounds = WorldBounds;
+            if (data != null && data.roomType == RoomType.Boss)
+            {
+                for (var i = 0; i < count; i++) positions.Add(bounds.center);
+                return positions;
+            }
             var playerPosition = activePlayer ? (Vector2)activePlayer.transform.position : (Vector2)bounds.center;
             for (var i = 0; i < count; i++)
             {
@@ -297,6 +306,7 @@ namespace ProjectLike.Phase5
             var brain = instance.AddComponent<EnemyBrain>();
             var eliteHealth = elite ? 2.3f : 1f; var eliteDamage = elite ? 1.05f : 1f; var eliteSpeed = elite ? 1.08f : 1f; var eliteCooldown = elite ? .92f : 1f;
             brain.Configure(template, this, data.enemyHealthMultiplier * eliteHealth, data.enemyDamageMultiplier * eliteDamage, data.enemySpeedMultiplier * eliteSpeed, data.enemyCooldownMultiplier * eliteCooldown, data.patternBonus);
+            if (template.kharosBoss) instance.AddComponent<KharosBossAI>();
             if (elite) instance.AddComponent<EliteEnemy>().Configure(brain, EliteEnemy.RandomModifier(), data.worldNumber);
             instance.AddComponent<EnemySpriteAnimator>();
             RegisterEnemy(brain);

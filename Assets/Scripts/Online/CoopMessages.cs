@@ -19,6 +19,12 @@ namespace ProjectLike.Online
         public string seed;
         public int world, level;
         public bool timeStopped, gameOver, hasMenu;
+        public bool bossActive;
+        public string bossName, bossPhase, bossMusic;
+        public float bossHealth, bossMaxHealth, bossMusicVolume, cameraTrauma, bossCinematicProgress, bossCameraSize, bossCameraRoll;
+        public int bossCinematicPhase;
+        public Vector3 bossPosition;
+        public Vector3 bossCameraPosition;
         public Color background;
         public Color flashColor;
         public float flash;
@@ -34,7 +40,9 @@ namespace ProjectLike.Online
         public Vector3 position;
         public float health, maxHealth, shield, maxShield, energy, maxEnergy;
         public bool downed, reviving;
+        public bool rootQte;
         public float reviveProgress;
+        public int qtePresses;
         public int reviverId;
         public string[] powers;
     }

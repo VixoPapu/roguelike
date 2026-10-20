@@ -44,7 +44,7 @@ namespace ProjectLike.Phase6
         public int CurrentLevel { get; private set; } = 1;
         public bool HasMiniBossThisLevel { get; private set; }
         public const int MaximumWorld = 5;
-        public const int LevelsPerWorld = 5;
+        public const int LevelsPerWorld = 6;
         public DungeonLayout Layout { get; private set; }
 
         readonly Dictionary<Vector2Int, DungeonRoomLayout> roomLookup = new Dictionary<Vector2Int, DungeonRoomLayout>();
@@ -53,6 +53,7 @@ namespace ProjectLike.Phase6
         System.Random random;
         GameObject generatedRoot;
         Sprite squareSprite;
+        bool kharosTestRun;
 
         void Awake()
         {
@@ -84,18 +85,41 @@ namespace ProjectLike.Phase6
             GenerateRun(Guid.NewGuid().ToString("N"));
         }
 
+        public void StartKharosTest(PlayerController player)
+        {
+            var kharos = Resources.Load<EnemyData>("Enemy_Kharos");
+            if (!kharos) { Debug.LogError("No se encontró Assets/Resources/Enemies/Kharos.asset"); return; }
+            CurrentWorld = 1; CurrentLevel = 1; HasMiniBossThisLevel = true; kharosTestRun = true;
+            currentSeed = "KHAROS-TEST"; random = new System.Random(StableHash(currentSeed));
+            PopulateEnemyPoolsFromScene(); ClearGeneratedDungeon();
+            if (replaceTrainingRoom) DisableTrainingRoom();
+            var entrance = new DungeonRoomLayout { gridPosition = Vector2Int.zero, roomType = RoomType.Entrance, visualVariant = RoomVisualVariant.Dungeon, mainPath = true, hasCustomGeometry = true, worldPosition = Vector2.zero, customRoomSize = new Vector2(18f, 14f) };
+            // Keep the entrance, short connecting bridge, arena, and exit on one axis.
+            var arena = new DungeonRoomLayout { gridPosition = Vector2Int.right, roomType = RoomType.Boss, visualVariant = RoomVisualVariant.BossArena, mainPath = true, hasCustomGeometry = true, worldPosition = new Vector2(37f, 0f), customRoomSize = new Vector2(50f, 36f) };
+            var exit = new DungeonRoomLayout { gridPosition = Vector2Int.right * 2, roomType = RoomType.Exit, visualVariant = RoomVisualVariant.Temple, mainPath = true, hasCustomGeometry = true, worldPosition = new Vector2(74f, 0f), customRoomSize = new Vector2(18f, 14f) };
+            entrance.connections.Add(RoomDirection.East); arena.connections.Add(RoomDirection.West); arena.connections.Add(RoomDirection.East); exit.connections.Add(RoomDirection.West);
+            Layout = new DungeonLayout { seed = currentSeed, rooms = new List<DungeonRoomLayout> { entrance, arena, exit } };
+            if (!ValidateCurrentLayout(out var reason)) { Debug.LogError("Arena de Kharos inválida: " + reason); return; }
+            kharosTestRun = true;
+            BuildPlayableDungeon();
+            if (player) { player.RestartForNewRun(); }
+        }
+
         public void GenerateRun(string seed)
         {
+            kharosTestRun = false;
             currentSeed = string.IsNullOrWhiteSpace(seed) ? "RogueLike-Seed" : seed;
             random = new System.Random(StableHash(currentSeed));
-            HasMiniBossThisLevel = CurrentLevel == LevelsPerWorld || !(CurrentWorld == 1 && CurrentLevel == 1) && random.NextDouble() < .28;
+            HasMiniBossThisLevel = CurrentLevel == LevelsPerWorld;
             PopulateEnemyPoolsFromScene();
             ClearGeneratedDungeon();
+            if (IsFinalBossLevel) KharosBossAI.WarmupSpawnAssets();
             if (replaceTrainingRoom) DisableTrainingRoom();
             Layout = BuildLayout(currentSeed);
             if (!ValidateCurrentLayout(out var reason)) { Debug.LogError("Dungeon inválido: " + reason); return; }
             BuildPlayableDungeon();
-            Debug.Log("[Dungeon] Mundo " + CurrentWorld + "-" + CurrentLevel + " · Seed " + currentSeed + " · " + (Layout.rooms.Count - 2) + " salas + entrada + portal" + (HasMiniBossThisLevel ? " + mini-boss." : "."));
+            Debug.Log("[Dungeon] Mundo " + CurrentWorld + "-" + CurrentLevel + " · Seed " + currentSeed + " · "
+                + (IsFinalBossLevel ? "entrada + arena de jefe gigante + portal desbloqueable." : (Layout.rooms.Count - 2) + " salas + entrada + portal."));
         }
 
         void PopulateEnemyPoolsFromScene()
@@ -127,10 +151,13 @@ namespace ProjectLike.Phase6
         {
             var layout = new DungeonLayout { seed = seed };
             roomLookup.Clear();
+            if (IsFinalBossLevel) return BuildFinalBossLayout(layout);
             var start = AddRoom(layout, Vector2Int.zero, RoomType.Entrance, true);
             var minimum = Mathf.Max(4, minGameplayRooms);
             var maximum = Mathf.Max(minimum, maxGameplayRooms);
-            var gameplayRooms = random.Next(minimum, maximum + 1);
+            // El primer mundo es mas corto para que los cinco niveles iniciales
+            // sean rapidos de aprender y no se alargue el tutorial.
+            var gameplayRooms = CurrentWorld == 1 ? random.Next(3, 5) : random.Next(minimum, maximum + 1);
             if (!ExtendMainPath(layout, start, gameplayRooms, gameplayRooms))
                 throw new InvalidOperationException("No fue posible crear el camino principal.");
             // Una tienda garantizada por piso, sin sumar habitaciones ni reemplazar
@@ -144,6 +171,28 @@ namespace ProjectLike.Phase6
             var finalRoom = layout.rooms[layout.rooms.Count - 1];
             if (!AttachExit(layout, finalRoom))
                 throw new InvalidOperationException("No fue posible conectar la sala del portal.");
+            return layout;
+        }
+
+        bool IsFinalBossLevel => CurrentLevel == LevelsPerWorld && !kharosTestRun;
+
+        DungeonLayout BuildFinalBossLayout(DungeonLayout layout)
+        {
+            const float arenaWidth = 72f;
+            const float arenaHeight = 50f;
+            var entrance = AddRoom(layout, Vector2Int.zero, RoomType.Entrance, true);
+            entrance.hasCustomGeometry = true;
+            entrance.customRoomSize = new Vector2(18f, 14f);
+            entrance.worldPosition = Vector2.zero;
+
+            var arena = AddRoom(layout, Vector2Int.right, RoomType.Boss, true);
+            arena.visualVariant = RoomVisualVariant.BossArena;
+            arena.hasCustomGeometry = true;
+            arena.customRoomSize = new Vector2(arenaWidth, arenaHeight);
+            // Keep a full bridge between spawn and the arena while placing Kharos
+            // in the center of a much larger room.
+            arena.worldPosition = new Vector2(9f + bridgeLength + arenaWidth * .5f, 0f);
+            Connect(entrance, arena, RoomDirection.East);
             return layout;
         }
 
@@ -232,7 +281,9 @@ namespace ProjectLike.Phase6
             if (Layout == null || Layout.rooms.Count == 0) { reason = "layout vacío"; return false; }
             var entrance = Layout.rooms.Find(room => room.roomType == RoomType.Entrance);
             var exit = Layout.rooms.Find(room => room.roomType == RoomType.Exit);
-            if (entrance == null || exit == null) { reason = "falta entrada o portal"; return false; }
+            var boss = Layout.rooms.Find(room => room.roomType == RoomType.Boss);
+            if (entrance == null || (!IsFinalBossLevel && exit == null)) { reason = "falta entrada o portal"; return false; }
+            if (IsFinalBossLevel && (boss == null || Layout.rooms.Count != 2)) { reason = "el nivel de jefe debe tener solo entrada y arena"; return false; }
             var visited = new HashSet<Vector2Int> { entrance.gridPosition };
             var queue = new Queue<DungeonRoomLayout>(); queue.Enqueue(entrance);
             while (queue.Count > 0)
@@ -247,9 +298,8 @@ namespace ProjectLike.Phase6
                 }
             }
             if (visited.Count != Layout.rooms.Count) { reason = "hay habitaciones aisladas"; return false; }
-            var boss = Layout.rooms.Find(room => room.roomType == RoomType.Boss);
             if (HasMiniBossThisLevel && (boss == null || !visited.Contains(boss.gridPosition))) { reason = "mini-boss inaccesible"; return false; }
-            if (!visited.Contains(exit.gridPosition)) { reason = "portal inaccesible"; return false; }
+            if (exit != null && !visited.Contains(exit.gridPosition)) { reason = "portal inaccesible"; return false; }
             return true;
         }
 
@@ -267,15 +317,13 @@ namespace ProjectLike.Phase6
             room.transform.SetParent(generatedRoot.transform);
             // Cada eje usa su dimensión real. Usar 12 también en Y dejaba un vacío
             // de dos unidades entre habitaciones de diez unidades de alto.
-            room.transform.position = new Vector3(
-                layoutRoom.gridPosition.x * (roomSize.x + bridgeLength),
-                layoutRoom.gridPosition.y * (roomSize.y + bridgeLength),
-                0f);
+            room.transform.position = RoomWorldPosition(layoutRoom);
             var node = room.AddComponent<DungeonRoomNode>(); node.Configure(layoutRoom);
-            CreateFloor(room.transform, layoutRoom);
-            var roomDoors = CreateWallsAndDoors(room.transform, layoutRoom);
+            var actualSize = RoomSizeFor(layoutRoom);
+            CreateFloor(room.transform, layoutRoom, actualSize);
+            var roomDoors = CreateWallsAndDoors(room.transform, layoutRoom, actualSize);
 
-            var bounds = room.AddComponent<BoxCollider2D>(); bounds.isTrigger = true; bounds.size = roomSize - Vector2.one * .65f;
+            var bounds = room.AddComponent<BoxCollider2D>(); bounds.isTrigger = true; bounds.size = actualSize - Vector2.one * .65f;
             var controller = room.AddComponent<RoomController>();
             controller.data = CreateRuntimeRoomData(layoutRoom);
             controller.doors = roomDoors.ToArray();
@@ -285,6 +333,12 @@ namespace ProjectLike.Phase6
             if (layoutRoom.roomType == RoomType.Treasure || layoutRoom.roomType == RoomType.Secret || controller.data.RequiresCombat)
                 controller.roomReward = CreateReward(room.transform, ChestTypeFor(layoutRoom.roomType));
             if (layoutRoom.roomType == RoomType.Exit) CreatePortal(room.transform);
+            else if (layoutRoom.roomType == RoomType.Boss && IsFinalBossLevel)
+            {
+                var bossPortal = CreatePortal(room.transform, new Vector2(actualSize.x * .36f, -actualSize.y * .2f));
+                bossPortal.SetActive(false);
+                controller.roomPortal = bossPortal;
+            }
             if (layoutRoom.roomType == RoomType.Shop) room.AddComponent<ShopController>();
         }
 
@@ -316,7 +370,9 @@ namespace ProjectLike.Phase6
             data.minimumSpawnInterval = tutorial ? .45f : .25f;
             data.maximumSpawnInterval = tutorial ? .7f : .55f;
             data.timeBetweenWaves = tutorial ? 1.8f : 1.5f;
-            data.patternBonus = Mathf.Min(2, Mathf.FloorToInt(worldStep / 3f));
+            // Introduce richer patterns from world 2, then add a projectile or
+            // summon to those patterns as each world advances.
+            data.patternBonus = CurrentWorld <= 1 ? 0 : Mathf.Clamp(1 + Mathf.FloorToInt((worldStep - 1f) / 1.5f), 1, 3);
             data.eliteMixChance = tutorial ? 0f : Mathf.Min(.22f, worldStep * .025f);
             var runPowers = FindAnyObjectByType<PowerUpRuntime>();
             if (!tutorial && runPowers) data.eliteMixChance = Mathf.Clamp01(data.eliteMixChance + runPowers.ExtraEliteChance);
@@ -336,11 +392,11 @@ namespace ProjectLike.Phase6
             else
             {
                 data.minWaves = 1;
-                data.maxWaves = tutorial ? 1 : worldStep >= 4 ? 3 : 2;
+                data.maxWaves = tutorial ? 1 : worldStep >= 2 ? 3 : 2;
                 var roomBonus = progress >= .65f ? 1 : 0;
                 var encounterStep = Mathf.FloorToInt(worldStep);
-                data.minEnemiesPerWave = Mathf.Min(10, 2 + encounterStep + roomBonus);
-                data.maxEnemiesPerWave = Mathf.Min(12, 3 + encounterStep + roomBonus);
+                data.minEnemiesPerWave = Mathf.Min(9, 2 + encounterStep + roomBonus);
+                data.maxEnemiesPerWave = Mathf.Min(10, 3 + encounterStep + roomBonus);
                 if (!tutorial && (layoutRoom.roomType == RoomType.DifficultCombat || layoutRoom.roomType == RoomType.Challenge))
                 {
                     data.minEnemiesPerWave = Mathf.Min(10, data.minEnemiesPerWave + 1);
@@ -351,6 +407,8 @@ namespace ProjectLike.Phase6
                 ? 0f
                 : layoutRoom.roomType == RoomType.Boss || layoutRoom.roomType == RoomType.Elite ? 1f : .65f;
             data.enemySpawns = CreateEnemySpawns(layoutRoom.roomType, progress);
+            if (kharosTestRun && layoutRoom.roomType == RoomType.Boss)
+                data.enemySpawns = new[] { new RoomEnemySpawn { enemy = Resources.Load<EnemyData>("Enemy_Kharos"), count = 1 } };
             return data;
         }
 
@@ -376,6 +434,11 @@ namespace ProjectLike.Phase6
             if (type != RoomType.Combat && type != RoomType.DifficultCombat && type != RoomType.Elite && type != RoomType.Challenge && type != RoomType.Boss) return Array.Empty<RoomEnemySpawn>();
             if (type == RoomType.Boss)
             {
+                if (CurrentWorld == 1 && CurrentLevel == LevelsPerWorld)
+                {
+                    var kharos = Resources.Load<EnemyData>("Enemy_Kharos");
+                    if (kharos) return new[] { new RoomEnemySpawn { enemy = kharos, count = 1, spread = .35f } };
+                }
                 var bosses = bossEnemies != null && bossEnemies.Length > 0 ? bossEnemies : eliteEnemies;
                 if (bosses == null || bosses.Length == 0) return Array.Empty<RoomEnemySpawn>();
                 var worldBosses = BossesForCurrentWorld(bosses);
@@ -529,31 +592,31 @@ namespace ProjectLike.Phase6
             return false;
         }
 
-        List<RoomDoor> CreateWallsAndDoors(Transform parent, DungeonRoomLayout room)
+        List<RoomDoor> CreateWallsAndDoors(Transform parent, DungeonRoomLayout room, Vector2 size)
         {
             var doors = new List<RoomDoor>();
-            CreateHorizontalEdge(parent, room, RoomDirection.North, roomSize.y * .5f, doors);
-            CreateHorizontalEdge(parent, room, RoomDirection.South, -roomSize.y * .5f, doors);
-            CreateVerticalEdge(parent, room, RoomDirection.East, roomSize.x * .5f, doors);
-            CreateVerticalEdge(parent, room, RoomDirection.West, -roomSize.x * .5f, doors);
+            CreateHorizontalEdge(parent, room, RoomDirection.North, size.y * .5f, size, doors);
+            CreateHorizontalEdge(parent, room, RoomDirection.South, -size.y * .5f, size, doors);
+            CreateVerticalEdge(parent, room, RoomDirection.East, size.x * .5f, size, doors);
+            CreateVerticalEdge(parent, room, RoomDirection.West, -size.x * .5f, size, doors);
             return doors;
         }
 
-        void CreateHorizontalEdge(Transform parent, DungeonRoomLayout room, RoomDirection direction, float y, List<RoomDoor> doors)
+        void CreateHorizontalEdge(Transform parent, DungeonRoomLayout room, RoomDirection direction, float y, Vector2 size, List<RoomDoor> doors)
         {
-            if (!room.connections.Contains(direction)) { CreateWall(parent, new Vector2(0, y), new Vector2(roomSize.x, .38f)); return; }
-            var opening = Mathf.Clamp(bridgeWidth, 1.8f, roomSize.x - 2f);
-            var half = (roomSize.x - opening) * .5f;
+            if (!room.connections.Contains(direction)) { CreateWall(parent, new Vector2(0, y), new Vector2(size.x, .38f)); return; }
+            var opening = Mathf.Clamp(bridgeWidth, 1.8f, size.x - 2f);
+            var half = (size.x - opening) * .5f;
             CreateWall(parent, new Vector2(-(half + opening) * .5f, y), new Vector2(half, .38f));
             CreateWall(parent, new Vector2((half + opening) * .5f, y), new Vector2(half, .38f));
             doors.Add(CreateDoor(parent, direction, new Vector2(0, y), new Vector2(opening, .5f)));
         }
 
-        void CreateVerticalEdge(Transform parent, DungeonRoomLayout room, RoomDirection direction, float x, List<RoomDoor> doors)
+        void CreateVerticalEdge(Transform parent, DungeonRoomLayout room, RoomDirection direction, float x, Vector2 size, List<RoomDoor> doors)
         {
-            if (!room.connections.Contains(direction)) { CreateWall(parent, new Vector2(x, 0), new Vector2(.38f, roomSize.y)); return; }
-            var opening = Mathf.Clamp(bridgeWidth, 1.8f, roomSize.y - 2f);
-            var half = (roomSize.y - opening) * .5f;
+            if (!room.connections.Contains(direction)) { CreateWall(parent, new Vector2(x, 0), new Vector2(.38f, size.y)); return; }
+            var opening = Mathf.Clamp(bridgeWidth, 1.8f, size.y - 2f);
+            var half = (size.y - opening) * .5f;
             CreateWall(parent, new Vector2(x, -(half + opening) * .5f), new Vector2(.38f, half));
             CreateWall(parent, new Vector2(x, (half + opening) * .5f), new Vector2(.38f, half));
             doors.Add(CreateDoor(parent, direction, new Vector2(x, 0), new Vector2(.5f, opening)));
@@ -573,27 +636,31 @@ namespace ProjectLike.Phase6
         {
             var neighbour = Layout.FindRoom(room.gridPosition + ToVector(direction));
             if (neighbour == null) return;
-            var first = RoomWorldPosition(room.gridPosition);
-            var second = RoomWorldPosition(neighbour.gridPosition);
+            var first = RoomWorldPosition(room);
+            var second = RoomWorldPosition(neighbour);
             var bridge = new GameObject("Bridge_" + room.gridPosition + "_" + direction);
             bridge.transform.SetParent(generatedRoot.transform, false);
             bridge.transform.position = (first + second) * .5f;
 
             var horizontal = direction == RoomDirection.East || direction == RoomDirection.West;
+            var gap = horizontal
+                ? Mathf.Abs(second.x - first.x) - (RoomSizeFor(room).x + RoomSizeFor(neighbour).x) * .5f
+                : Mathf.Abs(second.y - first.y) - (RoomSizeFor(room).y + RoomSizeFor(neighbour).y) * .5f;
+            gap = Mathf.Max(.5f, gap);
             var floorSize = horizontal
-                ? new Vector2(bridgeLength + .5f, bridgeWidth)
-                : new Vector2(bridgeWidth, bridgeLength + .5f);
+                ? new Vector2(gap + .5f, bridgeWidth)
+                : new Vector2(bridgeWidth, gap + .5f);
             CreateSpriteObject("BridgeFloor", bridge.transform, Vector2.zero, floorSize, new Color(.14f, .17f, .22f), -4);
 
             if (horizontal)
             {
-                CreateBridgeRail(bridge.transform, new Vector2(0f, bridgeWidth * .5f), new Vector2(bridgeLength + .55f, bridgeRailThickness));
-                CreateBridgeRail(bridge.transform, new Vector2(0f, -bridgeWidth * .5f), new Vector2(bridgeLength + .55f, bridgeRailThickness));
+                CreateBridgeRail(bridge.transform, new Vector2(0f, bridgeWidth * .5f), new Vector2(gap + .55f, bridgeRailThickness));
+                CreateBridgeRail(bridge.transform, new Vector2(0f, -bridgeWidth * .5f), new Vector2(gap + .55f, bridgeRailThickness));
             }
             else
             {
-                CreateBridgeRail(bridge.transform, new Vector2(bridgeWidth * .5f, 0f), new Vector2(bridgeRailThickness, bridgeLength + .55f));
-                CreateBridgeRail(bridge.transform, new Vector2(-bridgeWidth * .5f, 0f), new Vector2(bridgeRailThickness, bridgeLength + .55f));
+                CreateBridgeRail(bridge.transform, new Vector2(bridgeWidth * .5f, 0f), new Vector2(bridgeRailThickness, gap + .55f));
+                CreateBridgeRail(bridge.transform, new Vector2(-bridgeWidth * .5f, 0f), new Vector2(bridgeRailThickness, gap + .55f));
             }
         }
 
@@ -603,13 +670,16 @@ namespace ProjectLike.Phase6
             rail.AddComponent<BoxCollider2D>();
         }
 
-        Vector3 RoomWorldPosition(Vector2Int gridPosition)
+        Vector3 RoomWorldPosition(DungeonRoomLayout room)
         {
+            if (room.hasCustomGeometry) return new Vector3(room.worldPosition.x, room.worldPosition.y, 0f);
             return new Vector3(
-                gridPosition.x * (roomSize.x + bridgeLength),
-                gridPosition.y * (roomSize.y + bridgeLength),
+                room.gridPosition.x * (roomSize.x + bridgeLength),
+                room.gridPosition.y * (roomSize.y + bridgeLength),
                 0f);
         }
+
+        Vector2 RoomSizeFor(DungeonRoomLayout room) => room.hasCustomGeometry ? room.customRoomSize : roomSize;
 
         RoomDoor CreateDoor(Transform parent, RoomDirection direction, Vector2 position, Vector2 size)
         {
@@ -619,10 +689,10 @@ namespace ProjectLike.Phase6
             return roomDoor;
         }
 
-        void CreateFloor(Transform parent, DungeonRoomLayout room)
+        void CreateFloor(Transform parent, DungeonRoomLayout room, Vector2 size)
         {
             var color = room.roomType == RoomType.Boss ? new Color(.22f, .08f, .10f) : room.roomType == RoomType.Treasure ? new Color(.17f, .14f, .06f) : room.roomType == RoomType.Shop ? new Color(.16f, .12f, .21f) : new Color(.11f, .13f, .17f);
-            CreateSpriteObject("Floor", parent, Vector2.zero, roomSize, color, -5);
+            CreateSpriteObject("Floor", parent, Vector2.zero, size, color, -5);
         }
 
         void CreateWall(Transform parent, Vector2 position, Vector2 size) => CreateSpriteObject("Wall", parent, position, size, new Color(.22f, .25f, .32f), 3).AddComponent<BoxCollider2D>();
@@ -645,13 +715,15 @@ namespace ProjectLike.Phase6
 
         static ChestType ChestTypeFor(RoomType type) => type == RoomType.Boss ? ChestType.Boss : type == RoomType.Secret ? ChestType.Secret : type == RoomType.Challenge ? ChestType.Cursed : type == RoomType.DifficultCombat || type == RoomType.Elite || type == RoomType.Treasure ? ChestType.Rare : ChestType.Common;
 
-        void CreatePortal(Transform parent)
+        GameObject CreatePortal(Transform parent, Vector2 localPosition = default)
         {
             var portal = CreateSpriteObject("ExitPortal", parent, Vector2.zero, new Vector2(1.25f, 1.25f), new Color(.18f, .72f, 1f, .82f), 6);
+            portal.transform.localPosition = localPosition;
             var collider = portal.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
             collider.radius = .65f;
             portal.AddComponent<DungeonPortal>();
+            return portal;
         }
 
         Sprite GetSquareSprite()

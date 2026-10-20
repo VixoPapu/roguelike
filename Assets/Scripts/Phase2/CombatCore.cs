@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 using ProjectLike.Phase1;
 using ProjectLike.Phase12;
 using ProjectLike.Phase3;
+using ProjectLike.Phase6;
 using ProjectLike.Audio;
 
 namespace ProjectLike.Phase2
@@ -124,7 +125,13 @@ namespace ProjectLike.Phase2
             if(equippedWeapon.projectile)FireProjectiles(aim,charge);else FireMelee(aim,charge);
         }
         Vector2 GetAim() => CoopInput.For(gameObject).aim;
-        float PlayerDamageScale => (stats ? Mathf.Max(.1f, stats.damage / 10f) : 1f) * TimeStopAbility.DamageMultiplierFor(gameObject);
+        float PlayerDamageScale => (stats ? Mathf.Clamp(stats.damage / 10f, .8f, 1.3f) : 1f) * .82f * TimeStopAbility.DamageMultiplierFor(gameObject);
+        internal static float BalancedEarlyLegendaryDamage(ICombatTarget target, WeaponData weapon, float damage)
+        {
+            if (weapon && weapon.rarity == WeaponRarity.Legendary && target is EnemyBrain enemy && enemy.OwningRoom && enemy.OwningRoom.data && enemy.OwningRoom.data.worldNumber == 1)
+                return Mathf.Min(damage, enemy.CurrentHealth * .65f);
+            return damage;
+        }
         float CriticalChance => Mathf.Clamp01(equippedWeapon.criticalChance + (stats ? stats.criticalChance : 0f) + (GetComponent<PowerUpRuntime>() ? GetComponent<PowerUpRuntime>().MeleeCriticalBonus(equippedWeapon) : 0f));
         void FireMelee(Vector2 aim, float charge)
         {
@@ -145,7 +152,7 @@ namespace ProjectLike.Phase2
                 var target = col.GetComponentInParent<ICombatTarget>();
                 if (target == null || !struck.Add(target)) continue;
                 var crit = UnityEngine.Random.value < CriticalChance;
-                target.ReceiveHit(new CombatHit { damage = weapon.damage * PlayerDamageScale * charge * (crit ? weapon.criticalMultiplier : 1f), direction = weapon.attackPattern == WeaponAttackPattern.Spin ? away.normalized : aim,
+                target.ReceiveHit(new CombatHit { damage = BalancedEarlyLegendaryDamage(target, weapon, weapon.damage * PlayerDamageScale * charge * (crit ? weapon.criticalMultiplier : 1f)), direction = weapon.attackPattern == WeaponAttackPattern.Spin ? away.normalized : aim,
                     knockback = weapon.knockback, critical = crit, weapon = weapon, source = gameObject });
             }
         }
@@ -212,7 +219,28 @@ namespace ProjectLike.Phase2
         readonly HashSet<ICombatTarget> struck = new HashSet<ICombatTarget>();
         float age; Vector2 orbitOrigin; bool spent;
         WeaponData data; Vector2 direction; float damageScale; float criticalChance; GameObject owner; float life=3;int remainingPierces,remainingBounces;bool homing,ignoreWalls;Rigidbody2D body;
-        public void Setup(WeaponData d,Vector2 dir,float scale,GameObject source,float overrideCriticalChance=-1f){data=d;life=d.projectileLifetime;orbitOrigin=transform.position;direction=dir;damageScale=scale;criticalChance=overrideCriticalChance>=0f?overrideCriticalChance:d.criticalChance;owner=source;var powers=source?source.GetComponent<PowerUpRuntime>():null;remainingPierces=d.piercing?99:powers?powers.ProjectilePierceCount:0;remainingBounces=d.bounces+(powers?powers.ProjectileBounces:0);homing=d.projectileMotion==WeaponProjectileMotion.Homing || powers&&powers.ProjectileHoming;ignoreWalls=powers&&powers.Has("flecha_espectral");var sr=gameObject.AddComponent<SpriteRenderer>();var effect=d.effectColor.a>0f?d.effectColor:Color.cyan;sr.color=d.elemental?effect:Color.Lerp(Color.yellow,Color.white,Mathf.InverseLerp(.65f,1.8f,scale));sr.sprite=CombatFeedback.GetWeaponSprite(d);if(!sr.sprite)sr.sprite=CombatFeedback.WhiteSprite;transform.right=dir;transform.localScale=Vector3.one*Mathf.Lerp(.8f,1.28f,Mathf.InverseLerp(.65f,1.8f,scale));var col=gameObject.AddComponent<CircleCollider2D>();col.isTrigger=true;body=gameObject.AddComponent<Rigidbody2D>();body.gravityScale=0;var speedMultiplier=Mathf.Lerp(.72f,1.55f,Mathf.InverseLerp(.65f,1.8f,scale));var playerStats=source?source.GetComponent<PlayerStats>():null;speedMultiplier*=playerStats?Mathf.Max(.25f,playerStats.projectileSpeed/8f):1f;body.linearVelocity=dir*d.projectileSpeed*speedMultiplier;}
+        static Material sharedTrailMaterial;
+        void Start()
+        {
+            var sourceRenderer = GetComponent<SpriteRenderer>();
+            if (!sourceRenderer) return;
+            var glowObject = new GameObject("SoftProjectileLight"); glowObject.transform.SetParent(transform, false);
+            glowObject.transform.localScale = Vector3.one * 1.45f;
+            var glow = glowObject.AddComponent<SpriteRenderer>();
+            glow.sprite = SoftGlowSprite.Sprite; glow.sharedMaterial = SoftGlowSprite.Material;
+            glow.sortingLayerID = sourceRenderer.sortingLayerID; glow.sortingOrder = sourceRenderer.sortingOrder - 1;
+            var tint = sourceRenderer.color;
+            glow.color = SoftGlowSprite.Tint(new Color(tint.r / 1.5f, tint.g / 1.5f, tint.b / 1.5f, tint.a), .6f, 1.25f);
+            if (!sharedTrailMaterial) sharedTrailMaterial = new Material(Shader.Find("Sprites/Default"));
+            var trail = gameObject.AddComponent<TrailRenderer>();
+            trail.sharedMaterial = sharedTrailMaterial; trail.time = .14f; trail.minVertexDistance = .03f;
+            trail.sortingOrder = sourceRenderer.sortingOrder - 2; trail.widthMultiplier = .11f;
+            trail.widthCurve = new AnimationCurve(new Keyframe(0f, 1f), new Keyframe(1f, 0f));
+            var gradient = new Gradient(); gradient.SetKeys(
+                new[] { new GradientColorKey(tint, 0f), new GradientColorKey(tint, 1f) },
+                new[] { new GradientAlphaKey(.65f, 0f), new GradientAlphaKey(0f, 1f) }); trail.colorGradient = gradient;
+        }
+        public void Setup(WeaponData d,Vector2 dir,float scale,GameObject source,float overrideCriticalChance=-1f){data=d;life=d.projectileLifetime;orbitOrigin=transform.position;direction=dir;damageScale=scale;criticalChance=overrideCriticalChance>=0f?overrideCriticalChance:d.criticalChance;owner=source;var powers=source?source.GetComponent<PowerUpRuntime>():null;remainingPierces=d.piercing?99:powers?powers.ProjectilePierceCount:0;remainingBounces=d.bounces+(powers?powers.ProjectileBounces:0);homing=d.projectileMotion==WeaponProjectileMotion.Homing || powers&&powers.ProjectileHoming;ignoreWalls=powers&&powers.Has("flecha_espectral");var sr=gameObject.AddComponent<SpriteRenderer>();var effect=d.effectColor.a>0f?d.effectColor:Color.cyan;var tint=d.elemental?effect:Color.Lerp(new Color(.55f,.82f,1f),Color.white,Mathf.InverseLerp(.65f,1.8f,scale));sr.color=new Color(tint.r,tint.g,tint.b,1f);sr.sprite=CombatFeedback.WhiteSprite;transform.right=dir;transform.localScale=new Vector3(.28f,.105f,1f)*Mathf.Lerp(.85f,1.2f,Mathf.InverseLerp(.65f,1.8f,scale));var col=gameObject.AddComponent<CircleCollider2D>();col.isTrigger=true;col.radius=.22f;body=gameObject.AddComponent<Rigidbody2D>();body.gravityScale=0;body.collisionDetectionMode=CollisionDetectionMode2D.Continuous;var speedMultiplier=Mathf.Lerp(.72f,1.55f,Mathf.InverseLerp(.65f,1.8f,scale));var playerStats=source?source.GetComponent<PlayerStats>():null;speedMultiplier*=playerStats?Mathf.Max(.25f,playerStats.projectileSpeed/8f):1f;body.linearVelocity=dir*d.projectileSpeed*speedMultiplier;}
         void Update(){if(TimeStopAbility.IsActive)return;life-=Time.deltaTime;age+=Time.deltaTime;
             if (data.projectileMotion == WeaponProjectileMotion.Returning && age > .45f && owner && body)
             {
@@ -236,7 +264,7 @@ namespace ProjectLike.Phase2
             if (target == null || !struck.Add(target)) return;
             if (remainingPierces > 0) remainingPierces--; else spent = true;
             var crit = UnityEngine.Random.value < criticalChance;
-            target.ReceiveHit(new CombatHit { damage = data.damage * damageScale * (crit ? data.criticalMultiplier : 1f), direction = direction,
+            target.ReceiveHit(new CombatHit { damage = WeaponController.BalancedEarlyLegendaryDamage(target, data, data.damage * damageScale * (crit ? data.criticalMultiplier : 1f)), direction = direction,
                 knockback = data.knockback, critical = crit, weapon = data, source = owner });
             if (spent) Destroy(gameObject);
         }

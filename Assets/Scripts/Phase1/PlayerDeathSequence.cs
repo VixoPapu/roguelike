@@ -18,6 +18,9 @@ namespace ProjectLike.Phase1
         Canvas canvas;
         Text statusText;
         float originalSize;
+        bool returningToMenu;
+        bool restarting;
+        Button restartButton;
 
         public static void Begin(PlayerController target)
         {
@@ -59,8 +62,7 @@ namespace ProjectLike.Phase1
         {
             if (!canvas) return;
             if (Keyboard.current != null && (Keyboard.current.rKey.wasPressedThisFrame || Keyboard.current.enterKey.wasPressedThisFrame)) RestartRun();
-            if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) RestartRun();
-            if (Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame) GoToLobby();
+            if (Keyboard.current != null && (Keyboard.current.lKey.wasPressedThisFrame || Keyboard.current.escapeKey.wasPressedThisFrame)) GoToLobby();
         }
 
         void BuildMenu()
@@ -87,18 +89,22 @@ namespace ProjectLike.Phase1
             var font = ResolveFont();
             MakeText(panel.transform, "Title", "HAS MUERTO", new Vector2(0f, 56f), new Vector2(270f, 38f), 25, new Color(1f, .18f, .15f), font);
             MakeText(panel.transform, "Hint", "R / ENTER / A", new Vector2(0f, 30f), new Vector2(260f, 20f), 11, new Color(.72f, .75f, .82f), font);
-            MakeButton(panel.transform, "RestartButton", "REINICIAR RUN", new Vector2(0f, -4f), new Color(.72f, .11f, .12f), font, RestartRun);
+            restartButton = MakeButton(panel.transform, "RestartButton", "REINICIAR RUN", new Vector2(0f, -4f), new Color(.72f, .11f, .12f), font, RestartRun);
             MakeButton(panel.transform, "LobbyButton", "MENÚ PRINCIPAL", new Vector2(0f, -48f), new Color(.12f, .16f, .24f), font, GoToLobby);
             statusText = MakeText(panel.transform, "Status", "", new Vector2(0f, -78f), new Vector2(270f, 18f), 10, new Color(.95f, .72f, .25f), font);
+            if (EventSystem.current && restartButton) EventSystem.current.SetSelectedGameObject(restartButton.gameObject);
         }
 
         void RestartRun()
         {
+            if (restarting || returningToMenu) return;
+            restarting = true;
             Time.timeScale = 1f;
             var generator = FindAnyObjectByType<DungeonGenerator>();
             if (generator && player)
             {
                 generator.RestartRun(player);
+                LevelIntroOverlay.Show(generator.CurrentWorld, generator.CurrentLevel);
                 var follow = sceneCamera ? sceneCamera.GetComponent<CameraFollow>() : null;
                 if (follow) { follow.SetCinematicZoom(false); follow.SetTarget(player.transform, true); }
                 if (sceneCamera && sceneCamera.orthographic) sceneCamera.orthographicSize = originalSize;
@@ -110,8 +116,21 @@ namespace ProjectLike.Phase1
 
         void GoToLobby()
         {
+            if (returningToMenu) return;
+            returningToMenu = true;
             Time.timeScale = 1f;
+            var follow = sceneCamera ? sceneCamera.GetComponent<CameraFollow>() : null;
+            if (follow) { follow.SetCinematicZoom(false); follow.SetTarget(player ? player.transform : null, false); }
+            if (sceneCamera && sceneCamera.orthographic && originalSize > 0f) sceneCamera.orthographicSize = originalSize;
+            ProjectLike.Phase3.KharosBossAI.StopEncounterMusic();
             MainMenuController.Show();
+            if (!MainMenuController.IsOpen)
+            {
+                returningToMenu = false;
+                if (statusText) statusText.text = "No se pudo abrir el menu";
+                Time.timeScale = 0f;
+                return;
+            }
             Destroy(gameObject);
         }
 
@@ -124,9 +143,13 @@ namespace ProjectLike.Phase1
 
         static void EnsureEventSystem()
         {
-            if (FindAnyObjectByType<EventSystem>()) return;
-            var events = new GameObject("EventSystem", typeof(EventSystem));
-            events.AddComponent<InputSystemUIInputModule>();
+            var events = FindAnyObjectByType<EventSystem>();
+            if (!events) events = new GameObject("EventSystem", typeof(EventSystem)).GetComponent<EventSystem>();
+            var legacy = events.GetComponent<StandaloneInputModule>();
+            if (legacy) legacy.enabled = false;
+            var input = events.GetComponent<InputSystemUIInputModule>();
+            if (!input) input = events.gameObject.AddComponent<InputSystemUIInputModule>();
+            input.AssignDefaultActions();
         }
 
         static Font ResolveFont()
@@ -162,7 +185,7 @@ namespace ProjectLike.Phase1
             return text;
         }
 
-        static void MakeButton(Transform parent, string name, string label, Vector2 position, Color color, Font font, UnityEngine.Events.UnityAction action)
+        static Button MakeButton(Transform parent, string name, string label, Vector2 position, Color color, Font font, UnityEngine.Events.UnityAction action)
         {
             var image = MakeImage(parent, name, color);
             SetRect(image.rectTransform, position, new Vector2(238f, 34f));
@@ -174,6 +197,7 @@ namespace ProjectLike.Phase1
             colors.pressedColor = Color.Lerp(color, Color.black, .2f);
             button.colors = colors;
             MakeText(image.transform, "Label", label, Vector2.zero, new Vector2(232f, 32f), 15, Color.white, font);
+            return button;
         }
 
         static void SetRect(RectTransform rect, Vector2 position, Vector2 size)

@@ -20,7 +20,6 @@ namespace ProjectLike.Phase12
         float burnUntil, poisonUntil, bleedUntil, chillUntil, shockUntil, curseUntil, frozenUntil, nextTick;
         float burnDamage, poisonDamage, bleedDamage;
         int iceStacks, bleedStacks;
-        float nextStatusVisual;
 
         public bool Burning => Time.time < burnUntil;
         public bool Poisoned => Time.time < poisonUntil;
@@ -36,15 +35,17 @@ namespace ProjectLike.Phase12
 
         public void Burn(GameObject owner, float duration, float damage, float tickDamageScale = .35f)
         {
+            var started = !Burning;
             if (!Burning) burnDamage = 0f;
             source = owner;
             var eternal = owner && owner.GetComponent<PowerUpRuntime>()?.Has("fuego_eterno") == true;
             burnUntil = Mathf.Max(burnUntil, Time.time + duration * (eternal ? 1.7f : 1f));
             burnDamage = Mathf.Max(burnDamage, damage * tickDamageScale);
+            if (started && (enemy || player)) CombatVfxPool.Instance.SpawnStatusSprite(transform.position, "Fire_Incinerate", new Color(1f, .27f, .035f));
         }
 
         public void Poison(GameObject owner, float duration, float damage) { source = owner; poisonUntil = Mathf.Max(poisonUntil, Time.time + duration); poisonDamage = Mathf.Max(poisonDamage, damage); }
-        public void Bleed(GameObject owner, float duration, float damage) { source = owner; bleedUntil = Mathf.Max(bleedUntil, Time.time + duration); bleedStacks = Mathf.Min(8, bleedStacks + 1); bleedDamage = Mathf.Max(bleedDamage, damage); }
+        public void Bleed(GameObject owner, float duration, float damage) { source = owner; bleedUntil = Mathf.Max(bleedUntil, Time.time + duration); bleedStacks = Mathf.Min(8, bleedStacks + 1); bleedDamage = Mathf.Max(bleedDamage, damage); if (enemy || player) CombatVfxPool.Instance.SpawnStatusSprite(transform.position, "Bleed_large", new Color(1f, .08f, .18f)); }
 
         public void Ice(int stacks, int freezeAt)
         {
@@ -60,6 +61,7 @@ namespace ProjectLike.Phase12
         public void Shock(GameObject owner, float duration, float damage, int jumps = 1, HashSet<EnemyBrain> struck = null)
         {
             source = owner; shockUntil = Mathf.Max(shockUntil, Time.time + duration);
+            if ((enemy || player) && damage > 0f) CombatVfxPool.Instance.SpawnStatusSprite(transform.position, "impact_lightning 1 _B", new Color(.35f, .65f, 1f));
             if (!enemy || jumps <= 0 || damage <= 0f) return;
             if (struck == null) struck = new HashSet<EnemyBrain>();
             struck.Add(enemy);
@@ -88,12 +90,6 @@ namespace ProjectLike.Phase12
         void Update()
         {
             if (enemy && enemy.IsDead) return;
-            if (enemy && Time.time >= nextStatusVisual && (Burning || Poisoned || IsFrozen || Electrified || Bleeding || Cursed))
-            {
-                nextStatusVisual = Time.time + .22f;
-                var color = Burning ? new Color(1f, .27f, .035f) : IsFrozen ? new Color(.35f, .85f, 1f) : Poisoned ? new Color(.35f, 1f, .14f) : Electrified ? new Color(.4f, .7f, 1f) : Bleeding ? new Color(1f, .08f, .18f) : new Color(.75f, .25f, 1f);
-                CombatVfxPool.Instance.SpawnStatusMotes(transform.position, color, Burning);
-            }
             if (enemy && Time.time >= chillUntil && !IsFrozen) enemy.ExternalSpeedMultiplier = 1f;
             if (Time.time >= bleedUntil) bleedStacks = 0;
             if (Time.time < nextTick) return;

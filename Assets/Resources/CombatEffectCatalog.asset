@@ -1,0 +1,177 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa388549521263b42bd43ba38eff0485, type: 3}
+  m_Name: CombatEffectCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectLike.Phase2.CombatEffectCatalog
+  effects:
+  - name: Bleed_large
+    frames:
+    - {fileID: -6151338179398932842, guid: 2838e0f5307889a448ca1c37d0de089a, type: 3}
+    - {fileID: 2384679271260210408, guid: 2838e0f5307889a448ca1c37d0de089a, type: 3}
+    - {fileID: 88868324015365465, guid: 2838e0f5307889a448ca1c37d0de089a, type: 3}
+    - {fileID: 7436791009862994493, guid: 2838e0f5307889a448ca1c37d0de089a, type: 3}
+    - {fileID: -5084444778906567425, guid: 2838e0f5307889a448ca1c37d0de089a, type: 3}
+    - {fileID: 4004154465055411716, guid: 2838e0f5307889a448ca1c37d0de089a, type: 3}
+  - name: Fire_Incinerate
+    frames:
+    - {fileID: 8785008787328436383, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: 7095805729008791226, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: -8663213284516447700, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: -981086041520057990, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: 4542846328478037977, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: 1803624062360858202, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: 1122938641543110834, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: -8230678059391375225, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: -6676758583667636442, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: -2053503651894615036, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: 7915498515838684209, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+    - {fileID: 385403702085148969, guid: b50a2b7ec2087c8429b353b7d915d0af, type: 3}
+  - name: fire_slash
+    frames:
+    - {fileID: -3664554862480171061, guid: b372e61ae2459844096a4743616f5dfa, type: 3}
+    - {fileID: 5738845433842511269, guid: b372e61ae2459844096a4743616f5dfa, type: 3}
+    - {fileID: 455746165605732362, guid: b372e61ae2459844096a4743616f5dfa, type: 3}
+    - {fileID: 3770177179477069224, guid: b372e61ae2459844096a4743616f5dfa, type: 3}
+    - {fileID: 6284848626470721650, guid: b372e61ae2459844096a4743616f5dfa, type: 3}
+    - {fileID: -7217318506789345811, guid: b372e61ae2459844096a4743616f5dfa, type: 3}
+  - name: impact_dust_cloud
+    frames:
+    - {fileID: 4164528587477488870, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+    - {fileID: 2121387665212110226, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+    - {fileID: -4894305638153900466, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+    - {fileID: -8306134892702266307, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+    - {fileID: 1249373302627697735, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+    - {fileID: -3294104059427606249, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+    - {fileID: -8790563509603121825, guid: 46a144f28f9ebb54793d5a8ba1e03e3f, type: 3}
+  - name: impact_fireclouds_med
+    frames:
+    - {fileID: -9017499635454504523, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: 5173080524516220323, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: -4041890700863361449, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: -6554697486335890795, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: -7864950745901057214, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: -6997592855754701779, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: -932378954653238668, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+    - {fileID: 3804574829586467126, guid: 60a0bfb641a4781428775994e67e708e, type: 3}
+  - name: impact_lightning 1 _B
+    frames:
+    - {fileID: -7762257218354800528, guid: 07f47f210065af143bc7ab237d11f741, type: 3}
+    - {fileID: -1187983400539045077, guid: 07f47f210065af143bc7ab237d11f741, type: 3}
+    - {fileID: 6001132338981529450, guid: 07f47f210065af143bc7ab237d11f741, type: 3}
+    - {fileID: -3327576435034199805, guid: 07f47f210065af143bc7ab237d11f741, type: 3}
+    - {fileID: 3292846474556409622, guid: 07f47f210065af143bc7ab237d11f741, type: 3}
+    - {fileID: -5742750470717891107, guid: 07f47f210065af143bc7ab237d11f741, type: 3}
+  - name: impact_lightning 1_Y
+    frames:
+    - {fileID: -302944351904678197, guid: c2477d1fb51ff604e89e940cd365bb9e, type: 3}
+    - {fileID: 1075129844377631235, guid: c2477d1fb51ff604e89e940cd365bb9e, type: 3}
+    - {fileID: -1080765563853623414, guid: c2477d1fb51ff604e89e940cd365bb9e, type: 3}
+    - {fileID: 3483163718997900723, guid: c2477d1fb51ff604e89e940cd365bb9e, type: 3}
+    - {fileID: -401755073996765687, guid: c2477d1fb51ff604e89e940cd365bb9e, type: 3}
+    - {fileID: 4299840047232083527, guid: c2477d1fb51ff604e89e940cd365bb9e, type: 3}
+  - name: lightning_bolt__B
+    frames:
+    - {fileID: -3732804918174424604, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: 5728548715504983942, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: -7035655440098616856, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: -604260623451337874, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: 3665762508876940398, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: -1048623647069470192, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: 7108824338981327482, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: -2634339612493699071, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: 4442760803152431422, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+    - {fileID: -3871076672330349825, guid: 8a0c2af0d252875459faa5280b47a87c, type: 3}
+  - name: lightning_bolt_Y
+    frames:
+    - {fileID: 2149861666442370073, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: 5012510794947178281, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: 1885793043674195868, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: -7195263686813208758, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: 353176736379204138, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: 8157616209779097269, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: -725387343146618962, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: -5048543192422275820, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: -2026414767147118680, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+    - {fileID: -1426954911219523244, guid: 00eab86858b658947a11e8c6156932dc, type: 3}
+  - name: lightning_orb_loop_B
+    frames:
+    - {fileID: 3587558708365718386, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+    - {fileID: -3996484566364718678, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+    - {fileID: -3269655578001663889, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+    - {fileID: -4364603463584992002, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+    - {fileID: 1408289595725174612, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+    - {fileID: -9089249949727306044, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+    - {fileID: 1241664619951855483, guid: 33fce9906d29a0b468cb04fdbd83f562, type: 3}
+  - name: lightning_orb_loop_Y
+    frames:
+    - {fileID: -849683785697018248, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+    - {fileID: 8008421269523823911, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+    - {fileID: -3244439428050894106, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+    - {fileID: -210429521171465608, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+    - {fileID: -5048196552813482835, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+    - {fileID: -4520085008695471235, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+    - {fileID: 7809897541996441479, guid: 2b42b953a7983194b8f65a9387c3b9ba, type: 3}
+  - name: nature_impact
+    frames:
+    - {fileID: -1086615331904462019, guid: 5615cefebe221fa4a949edec664149fa, type: 3}
+    - {fileID: 2340006831639770872, guid: 5615cefebe221fa4a949edec664149fa, type: 3}
+    - {fileID: -954834795674576380, guid: 5615cefebe221fa4a949edec664149fa, type: 3}
+    - {fileID: 6185473984588659655, guid: 5615cefebe221fa4a949edec664149fa, type: 3}
+    - {fileID: 8685364590472525993, guid: 5615cefebe221fa4a949edec664149fa, type: 3}
+    - {fileID: 3928361816191352636, guid: 5615cefebe221fa4a949edec664149fa, type: 3}
+  - name: nature_vine_travel_loop
+    frames:
+    - {fileID: -2819148469254505593, guid: 9ca9dac735302ac498e134cb1dd2b882, type: 3}
+    - {fileID: -277738146690973558, guid: 9ca9dac735302ac498e134cb1dd2b882, type: 3}
+    - {fileID: -7431013261545803420, guid: 9ca9dac735302ac498e134cb1dd2b882, type: 3}
+    - {fileID: 974308924934527701, guid: 9ca9dac735302ac498e134cb1dd2b882, type: 3}
+    - {fileID: 7240918248196632563, guid: 9ca9dac735302ac498e134cb1dd2b882, type: 3}
+  - name: proj_fireball
+    frames:
+    - {fileID: 2646016401017709015, guid: 79f338d51b693c34db90a66816ebd3fb, type: 3}
+    - {fileID: -3034745291771859126, guid: 79f338d51b693c34db90a66816ebd3fb, type: 3}
+    - {fileID: 5729032364415459211, guid: 79f338d51b693c34db90a66816ebd3fb, type: 3}
+    - {fileID: 6358994074424339839, guid: 79f338d51b693c34db90a66816ebd3fb, type: 3}
+    - {fileID: -6157525043873963216, guid: 79f338d51b693c34db90a66816ebd3fb, type: 3}
+    - {fileID: -9124566441363490373, guid: 79f338d51b693c34db90a66816ebd3fb, type: 3}
+  - name: proj_lightning 4_B
+    frames:
+    - {fileID: 1901439348978229038, guid: eaece9b0a46906c428a0430e531e98bd, type: 3}
+    - {fileID: -1065740881872480856, guid: eaece9b0a46906c428a0430e531e98bd, type: 3}
+    - {fileID: 3128615214553266661, guid: eaece9b0a46906c428a0430e531e98bd, type: 3}
+    - {fileID: 9072118663056266775, guid: eaece9b0a46906c428a0430e531e98bd, type: 3}
+    - {fileID: 4049141553902638969, guid: eaece9b0a46906c428a0430e531e98bd, type: 3}
+    - {fileID: 6859220173154681460, guid: eaece9b0a46906c428a0430e531e98bd, type: 3}
+  - name: proj_lightning_4_Y
+    frames:
+    - {fileID: -8154195881937786562, guid: 1fdf84d2055b8f04499ed1e9f8f53e5d, type: 3}
+    - {fileID: -876507627888598709, guid: 1fdf84d2055b8f04499ed1e9f8f53e5d, type: 3}
+    - {fileID: 8792017388654916208, guid: 1fdf84d2055b8f04499ed1e9f8f53e5d, type: 3}
+    - {fileID: 1493984654605517920, guid: 1fdf84d2055b8f04499ed1e9f8f53e5d, type: 3}
+    - {fileID: 6182644023114530128, guid: 1fdf84d2055b8f04499ed1e9f8f53e5d, type: 3}
+    - {fileID: -16047203662981591, guid: 1fdf84d2055b8f04499ed1e9f8f53e5d, type: 3}
+  - name: proj_nature_1
+    frames:
+    - {fileID: -5042945221181037224, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+    - {fileID: -3869194559043354332, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+    - {fileID: -3533951775647438145, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+    - {fileID: 5096860559999445043, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+    - {fileID: 2347334037205758488, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+    - {fileID: 4804214892669463487, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+    - {fileID: 5024511894530761736, guid: 8e451f5e03116694ea7d79020d89c7e9, type: 3}
+  - name: slash_v3
+    frames:
+    - {fileID: -5006669178453707021, guid: 1d9c467be87f0644d9a86e153ae5d0dc, type: 3}
+    - {fileID: 7479191485570098591, guid: 1d9c467be87f0644d9a86e153ae5d0dc, type: 3}
+    - {fileID: -8427874834878929400, guid: 1d9c467be87f0644d9a86e153ae5d0dc, type: 3}
+    - {fileID: 553488699061562355, guid: 1d9c467be87f0644d9a86e153ae5d0dc, type: 3}
+    - {fileID: 8036858774568861507, guid: 1d9c467be87f0644d9a86e153ae5d0dc, type: 3}

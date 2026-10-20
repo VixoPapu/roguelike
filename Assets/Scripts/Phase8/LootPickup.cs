@@ -31,11 +31,16 @@ namespace ProjectLike.Phase8
         public void Setup(LootData loot, int amount)
         {
             data = loot; quantity = Mathf.Max(1, amount);
-            prompt = "";
+            UpdatePrompt();
             BuildVisual();
         }
 
-        void Start() { BuildVisual(); }
+        void Start() { UpdatePrompt(); BuildVisual(); }
+
+        void UpdatePrompt()
+        {
+            prompt = data && !data.autoPickup ? "Tomar " + data.displayName : "";
+        }
 
         void BuildVisual()
         {

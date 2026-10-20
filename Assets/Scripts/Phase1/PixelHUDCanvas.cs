@@ -32,6 +32,13 @@ namespace ProjectLike.Phase1
         Image healthFill, shieldFill, energyFill;
         GameObject healthWarning, shieldWarning, energyWarning;
         Text healthValue, shieldValue, energyValue, coinsValue, prompt;
+        [Header("Iconos de teclado para interacción")]
+        [Tooltip("Sprite de la tecla E del atlas kb_dark_alphanumeric. Se puede reemplazar desde el Inspector.")]
+        public Sprite keyboardInteractIcon;
+        [Header("Iconos del QTE de Kharos")]
+        [Tooltip("Sprite 138 del atlas kb_dark_alphanumeric.")] public Sprite kharosQteIcon138;
+        [Tooltip("Sprite 136 del atlas kb_dark_alphanumeric.")] public Sprite kharosQteIcon136;
+        Image promptKeyIcon;
         Text primaryWeaponValue, secondaryWeaponValue, consumableValue;
 
         void Awake()
@@ -73,7 +80,12 @@ namespace ProjectLike.Phase1
             WeaponSlots();
             powerUpList = Rect("PowerUpList", transform, new Vector2(0, 1), new Vector2(0, 1), new Vector2(0, 1), new Vector2(8, -128), new Vector2(232, 112));
 
-            prompt = TextElement("InteractionPrompt", transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(0, 55), new Vector2(500, 36), 20, TextAnchor.MiddleCenter);
+            prompt = TextElement("InteractionPrompt", transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(55, 55), new Vector2(370, 36), 18, TextAnchor.MiddleLeft);
+            promptKeyIcon = Rect("InteractionKeyIcon", transform, new Vector2(.5f, 0), new Vector2(.5f, 0), new Vector2(.5f, .5f), new Vector2(-174, 73), new Vector2(32, 32)).gameObject.AddComponent<Image>();
+            promptKeyIcon.sprite = keyboardInteractIcon;
+            promptKeyIcon.preserveAspect = true;
+            promptKeyIcon.raycastTarget = false;
+            promptKeyIcon.enabled = false;
         }
 
         RectTransform Rect(string name, Transform parent, Vector2 min, Vector2 max, Vector2 pivot, Vector2 pos, Vector2 size)
@@ -234,7 +246,11 @@ namespace ProjectLike.Phase1
             abilityStatus.text = !ability ? "" : ability.Remaining > 0f ? $"TIEMPO DETENIDO {ability.Remaining:0.0}s" : ability.CooldownRemaining > 0f ? $"[F / R3] Tiempo cero: {ability.CooldownRemaining:0}s" : "[F / R3] Tiempo cero - 150 energia";
             var target = interaction && Time.timeScale > 0f ? interaction.FindTarget() : null;
             var loot = target as LootPickup;
-            prompt.text = target != null && !loot ? "[ E / A ]  " + target.Prompt : "";
+            var canInteract = target != null;
+            prompt.text = canInteract ? "/ A   " + target.Prompt : "";
+            promptKeyIcon.enabled = canInteract && keyboardInteractIcon != null;
+            prompt.rectTransform.anchoredPosition = new Vector2(55, loot ? 124 : 55);
+            promptKeyIcon.rectTransform.anchoredPosition = new Vector2(-174, loot ? 142 : 73);
             lootPanel.gameObject.SetActive(loot && loot.CanCollect);
             if (loot && loot.CanCollect) ShowLootStats(loot.data, loot.quantity);
         }
